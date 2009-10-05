@@ -1,0 +1,166 @@
+Generated File. Do not edit.
+
+[HEADER]
+Version|0.10|$
+
+[PLUGINS]
+C:\Program Files\Windows Media Player\npwmsdrm.dll|$
+|$
+9.0.0.4503|$
+1208131922000|1|5|$
+DRM Store Netscape Plugin|$
+Microsoft® DRM|$
+1
+0|application/x-drm|Network Interface Plugin|nip|$
+C:\Program Files\Windows Media Player\npdsplay.dll|$
+|$
+3.0.2.629|$
+1208131922000|1|5|$
+Npdsplay dll|$
+Windows Media Player Plug-in Dynamic Link Library|$
+9
+0|application/asx|Media Files|*|$
+1|video/x-ms-asf-plugin|Media Files|*|$
+2|application/x-mplayer2|Media Files|*|$
+3|video/x-ms-asf|Media Files|asf,asx,*|$
+4|video/x-ms-wm|Media Files|wm,*|$
+5|audio/x-ms-wma|Media Files|wma,*|$
+6|audio/x-ms-wax|Media Files|wax,*|$
+7|video/x-ms-wmv|Media Files|wmv,*|$
+8|video/x-ms-wvx|Media Files|wvx,*|$
+C:\Program Files\Windows Media Player\npdrmv2.dll|$
+|$
+9.0.0.4503|$
+1208131976000|1|5|$
+DRM Netscape Network Object|$
+Microsoft® DRM|$
+1
+0|application/x-drm-v2|Network Interface Plugin|nip|$
+C:\Java\jre6\bin\new_plugin\npdeploytk.dll|$
+|$
+6.0.110.3|$
+1232993372980|1|5|$
+Java(TM) Platform SE binary|$
+Java(TM) Platform SE 6 U11|$
+1
+0|application/npruntime-scriptable-plugin;DeploymentToolkit|||$
+C:\Java\jre6\bin\new_plugin\npjp2.dll|$
+|$
+6.0.150.3|$
+1248524563000|1|5|$
+Next Generation Java Plug-in 1.6.0_15 for Mozilla browsers|$
+Java(TM) Platform SE 6 U15|$
+34
+0|application/x-java-applet|Java Applet||$
+1|application/x-java-bean|JavaBeans||$
+2|application/x-java-vm|||$
+3|application/x-java-applet;version=1.1.1|||$
+4|application/x-java-bean;version=1.1.1|||$
+5|application/x-java-applet;version=1.1|||$
+6|application/x-java-bean;version=1.1|||$
+7|application/x-java-applet;version=1.2|||$
+8|application/x-java-bean;version=1.2|||$
+9|application/x-java-applet;version=1.1.3|||$
+10|application/x-java-bean;version=1.1.3|||$
+11|application/x-java-applet;version=1.1.2|||$
+12|application/x-java-bean;version=1.1.2|||$
+13|application/x-java-applet;version=1.3|||$
+14|application/x-java-bean;version=1.3|||$
+15|application/x-java-applet;version=1.2.2|||$
+16|application/x-java-bean;version=1.2.2|||$
+17|application/x-java-applet;version=1.2.1|||$
+18|application/x-java-bean;version=1.2.1|||$
+19|application/x-java-applet;version=1.3.1|||$
+20|application/x-java-bean;version=1.3.1|||$
+21|application/x-java-applet;version=1.4|||$
+22|application/x-java-bean;version=1.4|||$
+23|application/x-java-applet;version=1.4.1|||$
+24|application/x-java-bean;version=1.4.1|||$
+25|application/x-java-applet;version=1.4.2|||$
+26|application/x-java-bean;version=1.4.2|||$
+27|application/x-java-applet;version=1.5|||$
+28|application/x-java-bean;version=1.5|||$
+29|application/x-java-applet;version=1.6|||$
+30|application/x-java-bean;version=1.6|||$
+31|application/x-java-applet;jpi-version=1.6.0_15|||$
+32|application/x-java-bean;jpi-version=1.6.0_15|||$
+33|application/x-java-vm-npruntime|||$
+c:\WINDOWS\Microsoft.NET\Framework\v3.5\Windows Presentation Foundation\NPWPF.dll|$
+|$
+3.5.30729.1|$
+1217400048000|1|5|$
+Windows Presentation Foundation (WPF) plug-in for Mozilla browsers|$
+Windows Presentation Foundation|$
+2
+0|application/x-ms-xbap|XAML Browser Application|xbap|$
+1|application/xaml+xml|XAML Document|xaml|$
+c:\Program Files\Microsoft Silverlight\3.0.40723.0\npctrl.dll|$
+|$
+3.0.40723.0|$
+1248323600000|1|5|$
+3.0.40723.0|$
+Silverlight Plug-In|$
+2
+0|application/x-silverlight|npctrl|scr|$
+1|application/x-silverlight-2|||$
+C:\WINDOWS\system32\Macromed\Flash\NPSWF32.dll|$
+|$
+10.0.32.18|$
+1247887260000|1|5|$
+Shockwave Flash 10.0 r32|$
+Shockwave Flash|$
+2
+0|application/x-shockwave-flash|Adobe Flash movie|swf|$
+1|application/futuresplash|FutureSplash movie|spl|$
+C:\Program Files\Mozilla Firefox\plugins\NPOFF12.DLL|$
+|$
+12.0.4518.1014|$
+1161922336000|1|5|$
+Office Plugin for Netscape Navigator|$
+2007 Microsoft Office system|$
+1
+0|application/x-msoffice12|12.0.4518.1014|*|$
+C:\Program Files\Mozilla Firefox\plugins\nppdf32.dll|$
+|$
+9.1.0.163|$
+1235762022000|1|5|$
+Adobe PDF Plug-In For Firefox and Netscape|$
+Adobe Acrobat|$
+7
+0|application/pdf|Acrobat Portable Document Format|pdf|$
+1|application/vnd.adobe.pdfxml|Adobe PDF in XML Format|pdfxml|$
+2|application/vnd.adobe.x-mars|Adobe PDF in XML Format|mars|$
+3|application/vnd.fdf|Acrobat Forms Data Format|fdf|$
+4|application/vnd.adobe.xfdf|XML Version of Acrobat Forms Data Format|xfdf|$
+5|application/vnd.adobe.xdp+xml| Acrobat XML Data Package|xdp|$
+6|application/vnd.adobe.xfd+xml|Adobe FormFlow99 Data File|xfd|$
+C:\Program Files\Mozilla Firefox\plugins\npdeploytk.dll|$
+|$
+6.0.150.3|$
+1248524581000|1|5|$
+NPRuntime Script Plug-in Library for Java(TM) Deploy|$
+Java Deployment Toolkit 6.0.150.3|$
+1
+0|application/npruntime-scriptable-plugin;DeploymentToolkit|||$
+C:\Program Files\Mozilla Firefox\plugins\npnul32.dll|$
+|$
+1.0.0.15|$
+1253207751790|1|5|$
+Default Plug-in|$
+Mozilla Default Plug-in|$
+1
+0|*|Mozilla Default Plug-in|*|$
+C:\Program Files\Adobe\Reader 9.0\Reader\browser\nppdf32.dll|$
+|$
+9.1.0.163|$
+1235762022000|1|13|$
+Adobe PDF Plug-In For Firefox and Netscape|$
+Adobe Acrobat|$
+7
+0|application/pdf|Acrobat Portable Document Format|pdf|$
+1|application/vnd.adobe.pdfxml|Adobe PDF in XML Format|pdfxml|$
+2|application/vnd.adobe.x-mars|Adobe PDF in XML Format|mars|$
+3|application/vnd.fdf|Acrobat Forms Data Format|fdf|$
+4|application/vnd.adobe.xfdf|XML Version of Acrobat Forms Data Format|xfdf|$
+5|application/vnd.adobe.xdp+xml| Acrobat XML Data Package|xdp|$
+6|application/vnd.adobe.xfd+xml|Adobe FormFlow99 Data File|xfd|$

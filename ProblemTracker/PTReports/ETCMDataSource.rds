@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RptDataSource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>ETCMDataSource</Name>
+  <DataSourceID>644b9784-4bf6-48c7-93b6-bb6842f9405d</DataSourceID>
+  <ConnectionProperties>
+    <Extension>SQL</Extension>
+    <ConnectString>Data Source=Alliance5;Initial Catalog=ETCM</ConnectString>
+  </ConnectionProperties>
+</RptDataSource>

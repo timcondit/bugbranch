@@ -1,0 +1,7 @@
+app-global	{972ce4c6-7e08-4474-a285-3208198ce6fd}	rel%{972ce4c6-7e08-4474-a285-3208198ce6fd}	1253207756	
+app-global	{CAFEEFAC-0016-0000-0011-ABCDEFFEDCBA}	rel%{CAFEEFAC-0016-0000-0011-ABCDEFFEDCBA}	1232993396	
+app-global	{CAFEEFAC-0016-0000-0015-ABCDEFFEDCBA}	rel%{CAFEEFAC-0016-0000-0015-ABCDEFFEDCBA}	1249920264	
+winreg-app-global	jqs@sun.com	abs%C:\Java\jre6\lib\deploy\jqs\ff	1232993375	
+winreg-app-global	{20a82645-c095-46ed-80e3-08825760534b}	abs%c:\WINDOWS\Microsoft.NET\Framework\v3.5\Windows Presentation Foundation\DotNetAssistantExtension	1251281249	
+app-profile	{20a82645-c095-46ed-80e3-08825760534b}	rel%{20a82645-c095-46ed-80e3-08825760534b}	1253212992	
+app-profile	{a6fd85ed-e919-4a43-a5af-8da18bda539f}	rel%{a6fd85ed-e919-4a43-a5af-8da18bda539f}	1253213072	

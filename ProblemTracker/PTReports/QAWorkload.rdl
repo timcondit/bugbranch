@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSources>
+    <DataSource Name="ETCMDataSource">
+      <rd:DataSourceID>493bee2c-b351-4bde-9a4e-41beb8e1201f</rd:DataSourceID>
+      <DataSourceReference>ETCMDataSource</DataSourceReference>
+    </DataSource>
+  </DataSources>
+  <InteractiveHeight>11in</InteractiveHeight>
+  <rd:DrawGrid>true</rd:DrawGrid>
+  <InteractiveWidth>8.5in</InteractiveWidth>
+  <rd:SnapToGrid>true</rd:SnapToGrid>
+  <RightMargin>1in</RightMargin>
+  <LeftMargin>1in</LeftMargin>
+  <BottomMargin>1in</BottomMargin>
+  <rd:ReportID>36c19856-fda4-4834-8652-7ee7fcbecbdc</rd:ReportID>
+  <DataSets>
+    <DataSet Name="QAWorklooad">
+      <Fields>
+        <Field Name="AssignedTo">
+          <DataField>AssignedTo</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="NumIssues">
+          <DataField>NumIssues</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>ETCMDataSource</DataSourceName>
+        <CommandText>SELECT AssignedTo, COUNT(*) AS NumIssues
+FROM Issue
+WHERE [Status] = 'Resolved'
+GROUP BY AssignedTo
+ORDER BY AssignedTo</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+    </DataSet>
+    <DataSet Name="ActiveProjects">
+      <Fields>
+        <Field Name="Project">
+          <DataField>Project</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>ETCMDataSource</DataSourceName>
+        <CommandText>SELECT Project FROM ActiveProjects</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+    </DataSet>
+  </DataSets>
+  <Width>7.5in</Width>
+  <Body>
+    <ReportItems>
+      <Chart Name="chart1">
+        <Legend>
+          <Style>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+          </Style>
+          <Position>RightCenter</Position>
+        </Legend>
+        <CategoryAxis>
+          <Axis>
+            <Title />
+            <Style />
+            <MajorGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Min>0</Min>
+            <Visible>true</Visible>
+          </Axis>
+        </CategoryAxis>
+        <ZIndex>1</ZIndex>
+        <DataSetName>QAWorklooad</DataSetName>
+        <PlotArea>
+          <Style>
+            <BackgroundColor>LightGrey</BackgroundColor>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+          </Style>
+        </PlotArea>
+        <ThreeDProperties>
+          <Rotation>30</Rotation>
+          <Inclination>30</Inclination>
+          <Shading>Simple</Shading>
+          <WallThickness>50</WallThickness>
+        </ThreeDProperties>
+        <PointWidth>0</PointWidth>
+        <Top>0.5in</Top>
+        <Subtype>Plain</Subtype>
+        <ValueAxis>
+          <Axis>
+            <Title>
+              <Caption>Issues in Resolved State</Caption>
+            </Title>
+            <MajorGridLines>
+              <ShowGridLines>true</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <MajorTickMarks>Outside</MajorTickMarks>
+            <Min>0</Min>
+            <Margin>true</Margin>
+            <Visible>true</Visible>
+            <Scalar>true</Scalar>
+          </Axis>
+        </ValueAxis>
+        <Type>Column</Type>
+        <Width>7.375in</Width>
+        <CategoryGroupings>
+          <CategoryGrouping>
+            <DynamicCategories>
+              <Grouping Name="chart1_CategoryGroup1">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!AssignedTo.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Sorting>
+                <SortBy>
+                  <SortExpression>=Fields!NumIssues.Value</SortExpression>
+                  <Direction>Descending</Direction>
+                </SortBy>
+              </Sorting>
+              <Label>=Fields!AssignedTo.Value</Label>
+            </DynamicCategories>
+          </CategoryGrouping>
+        </CategoryGroupings>
+        <Palette>Default</Palette>
+        <ChartData>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!NumIssues.Value)</Value>
+                  </DataValue>
+                </DataValues>
+                <DataLabel>
+                  <Visible>true</Visible>
+                </DataLabel>
+                <Style>
+                  <BackgroundColor>=IIf(Fields!AssignedTo.Value = "TBD", "Yellow", "Green")</BackgroundColor>
+                </Style>
+                <Marker>
+                  <Size>6pt</Size>
+                </Marker>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+        </ChartData>
+        <Style>
+          <BackgroundColor>White</BackgroundColor>
+        </Style>
+        <Title />
+        <Height>4.375in</Height>
+      </Chart>
+      <Textbox Name="textbox1">
+        <rd:DefaultName>textbox1</rd:DefaultName>
+        <Width>7.375in</Width>
+        <Style>
+          <Color>SteelBlue</Color>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>20pt</FontSize>
+          <FontWeight>700</FontWeight>
+          <PaddingLeft>2pt</PaddingLeft>
+          <PaddingRight>2pt</PaddingRight>
+          <PaddingTop>2pt</PaddingTop>
+          <PaddingBottom>2pt</PaddingBottom>
+        </Style>
+        <CanGrow>true</CanGrow>
+        <Height>0.36in</Height>
+        <Value>QA Workload</Value>
+      </Textbox>
+    </ReportItems>
+    <Height>5in</Height>
+  </Body>
+  <Language>en-US</Language>
+  <TopMargin>1in</TopMargin>
+</Report>

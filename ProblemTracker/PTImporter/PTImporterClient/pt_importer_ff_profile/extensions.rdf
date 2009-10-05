@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<RDF:RDF xmlns:NS1="http://www.mozilla.org/2004/em-rdf#"
+         xmlns:NC="http://home.netscape.com/NC-rdf#"
+         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <RDF:Description RDF:about="urn:mozilla:item:jqs@sun.com"
+                   NS1:installLocation="winreg-app-global"
+                   NS1:version="1.0"
+                   NS1:name="Java Quick Starter">
+    <NS1:type NC:parseType="Integer">2</NS1:type>
+    <NS1:targetApplication RDF:resource="rdf:#$syjHC"/>
+  </RDF:Description>
+  <RDF:Description RDF:about="urn:mozilla:item:{CAFEEFAC-0016-0000-0011-ABCDEFFEDCBA}"
+                   NS1:installLocation="app-global"
+                   NS1:version="6.0.11"
+                   NS1:hidden="true"
+                   NS1:name="Java Console">
+    <NS1:type NC:parseType="Integer">2</NS1:type>
+    <NS1:targetApplication RDF:resource="rdf:#$OyjHC"/>
+  </RDF:Description>
+  <RDF:Description RDF:about="rdf:#$Iiqgz1"
+                   NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+                   NS1:minVersion="1.5"
+                   NS1:maxVersion="3.*.*" />
+  <RDF:Description RDF:about="urn:mozilla:item:{972ce4c6-7e08-4474-a285-3208198ce6fd}"
+                   NS1:installLocation="app-global"
+                   NS1:version="3.5.3"
+                   NS1:internalName="classic/1.0"
+                   NS1:locked="true"
+                   NS1:appManaged="true"
+                   NS1:name="Default"
+                   NS1:description="The default theme."
+                   NS1:creator="Mozilla"
+                   NS1:contributor="Mozilla Contributors">
+    <NS1:type NC:parseType="Integer">4</NS1:type>
+    <NS1:targetApplication RDF:resource="rdf:#$1zjHC"/>
+  </RDF:Description>
+  <RDF:Seq RDF:about="urn:mozilla:item:root">
+    <RDF:li RDF:resource="urn:mozilla:item:{972ce4c6-7e08-4474-a285-3208198ce6fd}"/>
+    <RDF:li RDF:resource="urn:mozilla:item:{CAFEEFAC-0016-0000-0011-ABCDEFFEDCBA}"/>
+    <RDF:li RDF:resource="urn:mozilla:item:{CAFEEFAC-0016-0000-0015-ABCDEFFEDCBA}"/>
+    <RDF:li RDF:resource="urn:mozilla:item:jqs@sun.com"/>
+    <RDF:li RDF:resource="urn:mozilla:item:{20a82645-c095-46ed-80e3-08825760534b}"/>
+    <RDF:li RDF:resource="urn:mozilla:item:{a6fd85ed-e919-4a43-a5af-8da18bda539f}"/>
+  </RDF:Seq>
+  <RDF:Description RDF:about="rdf:#$OyjHC"
+                   NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+                   NS1:minVersion="1.0"
+                   NS1:maxVersion="5.0+" />
+  <RDF:Description RDF:about="urn:mozilla:item:{20a82645-c095-46ed-80e3-08825760534b}"
+                   NS1:installLocation="app-profile"
+                   NS1:version="1.1"
+                   NS1:updateURL="https://go.microsoft.com/fwlink/?LinkID=139711"
+                   NS1:optionsURL="chrome://dotnetassistant/content/options.xul"
+                   NS1:name="Microsoft .NET Framework Assistant"
+                   NS1:description="Adds ClickOnce support and the ability to report installed .NET versions to the web server."
+                   NS1:creator="Microsoft"
+                   NS1:homepageURL="http://www.windowsclient.net/">
+    <NS1:type NC:parseType="Integer">2</NS1:type>
+    <NS1:targetApplication RDF:resource="rdf:#$Iiqgz1"/>
+  </RDF:Description>
+  <RDF:Description RDF:about="rdf:#$DyjHC"
+                   NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+                   NS1:minVersion="1.0"
+                   NS1:maxVersion="5.0+" />
+  <RDF:Description RDF:about="urn:mozilla:item:{CAFEEFAC-0016-0000-0015-ABCDEFFEDCBA}"
+                   NS1:installLocation="app-global"
+                   NS1:version="6.0.15"
+                   NS1:hidden="true"
+                   NS1:name="Java Console">
+    <NS1:type NC:parseType="Integer">2</NS1:type>
+    <NS1:targetApplication RDF:resource="rdf:#$DyjHC"/>
+  </RDF:Description>
+  <RDF:Description RDF:about="rdf:#$LtH+D1"
+                   NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+                   NS1:minVersion="1.5"
+                   NS1:maxVersion="3.5.*" />
+  <RDF:Description RDF:about="rdf:#$1zjHC"
+                   NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+                   NS1:minVersion="3.5.3"
+                   NS1:maxVersion="3.5.3" />
+  <RDF:Description RDF:about="urn:mozilla:item:{a6fd85ed-e919-4a43-a5af-8da18bda539f}"
+                   NS1:installLocation="app-profile"
+                   NS1:version="1.0.2"
+                   NS1:optionsURL="chrome://selenium-ide/content/optionsDialog.xul"
+                   NS1:name="Selenium IDE"
+                   NS1:description="Record, edit and play Selenium tests"
+                   NS1:creator="Shinya Kasatani"
+                   NS1:homepageURL="http://seleniumhq.org/projects/ide">
+    <NS1:type NC:parseType="Integer">2</NS1:type>
+    <NS1:targetApplication RDF:resource="rdf:#$LtH+D1"/>
+  </RDF:Description>
+  <RDF:Description RDF:about="rdf:#$syjHC"
+                   NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+                   NS1:minVersion="1.5"
+                   NS1:maxVersion="*" />
+</RDF:RDF>

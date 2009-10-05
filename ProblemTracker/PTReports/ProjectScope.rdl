@@ -1,0 +1,270 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSources>
+    <DataSource Name="ETCMDataSource">
+      <rd:DataSourceID>493bee2c-b351-4bde-9a4e-41beb8e1201f</rd:DataSourceID>
+      <DataSourceReference>ETCMDataSource</DataSourceReference>
+    </DataSource>
+  </DataSources>
+  <InteractiveHeight>11in</InteractiveHeight>
+  <rd:DrawGrid>true</rd:DrawGrid>
+  <InteractiveWidth>8.5in</InteractiveWidth>
+  <rd:SnapToGrid>true</rd:SnapToGrid>
+  <RightMargin>1in</RightMargin>
+  <LeftMargin>1in</LeftMargin>
+  <BottomMargin>1in</BottomMargin>
+  <rd:ReportID>36c19856-fda4-4834-8652-7ee7fcbecbdc</rd:ReportID>
+  <DataSets>
+    <DataSet Name="DevWorklooad">
+      <Fields>
+        <Field Name="Project">
+          <DataField>Project</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="NumReported">
+          <DataField>NumReported</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="NumAssigned">
+          <DataField>NumAssigned</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="NumResolved">
+          <DataField>NumResolved</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="NumClosed">
+          <DataField>NumClosed</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="NumDeferred">
+          <DataField>NumDeferred</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>ETCMDataSource</DataSourceName>
+        <CommandText>SELECT Project,
+	dbo.GetNumIssuesByProjectStatus(Project, 'Reported') AS NumReported,
+	dbo.GetNumIssuesByProjectStatus(Project, 'Assigned') AS NumAssigned,
+	dbo.GetNumIssuesByProjectStatus(Project, 'Resolved') AS NumResolved,
+	dbo.GetNumIssuesByProjectStatus(Project, 'Closed') AS NumClosed,
+	dbo.GetNumIssuesByProjectStatus(Project, 'Deferred') AS NumDeferred
+FROM ActiveProjects
+WHERE Project &lt;&gt; 'Engineering Build'
+ORDER BY Project</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+    </DataSet>
+  </DataSets>
+  <Width>7.5in</Width>
+  <Body>
+    <ReportItems>
+      <Chart Name="chart1">
+        <Legend>
+          <Visible>true</Visible>
+          <Style>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+          </Style>
+          <Position>BottomCenter</Position>
+        </Legend>
+        <CategoryAxis>
+          <Axis>
+            <Title />
+            <Style />
+            <MajorGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Min>0</Min>
+            <Visible>true</Visible>
+          </Axis>
+        </CategoryAxis>
+        <ZIndex>1</ZIndex>
+        <DataSetName>DevWorklooad</DataSetName>
+        <PlotArea>
+          <Style>
+            <BackgroundColor>LightGrey</BackgroundColor>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+          </Style>
+        </PlotArea>
+        <ThreeDProperties>
+          <Rotation>30</Rotation>
+          <Inclination>30</Inclination>
+          <Shading>Simple</Shading>
+          <WallThickness>50</WallThickness>
+        </ThreeDProperties>
+        <PointWidth>0</PointWidth>
+        <SeriesGroupings>
+          <SeriesGrouping>
+            <StaticSeries>
+              <StaticMember>
+                <Label>Num Assigned</Label>
+              </StaticMember>
+              <StaticMember>
+                <Label>Num Resolved</Label>
+              </StaticMember>
+              <StaticMember>
+                <Label>Num Closed</Label>
+              </StaticMember>
+            </StaticSeries>
+          </SeriesGrouping>
+        </SeriesGroupings>
+        <Top>0.5in</Top>
+        <Subtype>PercentStacked</Subtype>
+        <ValueAxis>
+          <Axis>
+            <Title />
+            <MajorGridLines>
+              <ShowGridLines>true</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <MajorTickMarks>Outside</MajorTickMarks>
+            <Min>0</Min>
+            <Margin>true</Margin>
+            <Visible>true</Visible>
+            <Scalar>true</Scalar>
+          </Axis>
+        </ValueAxis>
+        <Type>Column</Type>
+        <Width>7.375in</Width>
+        <CategoryGroupings>
+          <CategoryGrouping>
+            <DynamicCategories>
+              <Grouping Name="chart1_CategoryGroup1">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Project.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Label>=Fields!Project.Value + "\n" + "Total: " +
+(Fields!NumReported.Value +
+Fields!NumAssigned.Value  +
+Fields!NumResolved.Value +
+Fields!NumClosed.Value +
+Fields!NumDeferred.Value).ToString()</Label>
+            </DynamicCategories>
+          </CategoryGrouping>
+        </CategoryGroupings>
+        <Palette>Default</Palette>
+        <ChartData>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!NumAssigned.Value)</Value>
+                  </DataValue>
+                </DataValues>
+                <DataLabel>
+                  <Style>
+                    <Color>White</Color>
+                  </Style>
+                  <Value>=Fields!NumAssigned.Value</Value>
+                  <Visible>true</Visible>
+                </DataLabel>
+                <Style>
+                  <BackgroundColor>DarkRed</BackgroundColor>
+                </Style>
+                <Marker>
+                  <Size>6pt</Size>
+                </Marker>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!NumResolved.Value)</Value>
+                  </DataValue>
+                </DataValues>
+                <DataLabel>
+                  <Value>=Fields!NumResolved.Value</Value>
+                  <Visible>true</Visible>
+                </DataLabel>
+                <Style>
+                  <BackgroundColor>DeepSkyBlue</BackgroundColor>
+                </Style>
+                <Marker>
+                  <Size>6pt</Size>
+                </Marker>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!NumClosed.Value)</Value>
+                  </DataValue>
+                </DataValues>
+                <DataLabel>
+                  <Value>=Fields!NumClosed.Value</Value>
+                  <Visible>true</Visible>
+                </DataLabel>
+                <Style>
+                  <BackgroundColor>LightCyan</BackgroundColor>
+                </Style>
+                <Marker>
+                  <Size>6pt</Size>
+                </Marker>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+        </ChartData>
+        <Style>
+          <BackgroundColor>White</BackgroundColor>
+        </Style>
+        <Title />
+        <Height>4.375in</Height>
+      </Chart>
+      <Textbox Name="textbox1">
+        <rd:DefaultName>textbox1</rd:DefaultName>
+        <Width>7.375in</Width>
+        <Style>
+          <Color>SteelBlue</Color>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>20pt</FontSize>
+          <FontWeight>700</FontWeight>
+          <PaddingLeft>2pt</PaddingLeft>
+          <PaddingRight>2pt</PaddingRight>
+          <PaddingTop>2pt</PaddingTop>
+          <PaddingBottom>2pt</PaddingBottom>
+        </Style>
+        <CanGrow>true</CanGrow>
+        <Height>0.36in</Height>
+        <Value>Project Scope</Value>
+      </Textbox>
+    </ReportItems>
+    <Height>5in</Height>
+  </Body>
+  <Language>en-US</Language>
+  <TopMargin>1in</TopMargin>
+</Report>

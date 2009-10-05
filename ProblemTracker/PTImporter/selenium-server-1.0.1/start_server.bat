@@ -1,0 +1,1 @@
+start java -jar selenium-server.jar -firefoxProfileTemplate "..\PTImporterClient\pt_importer_ff_profile"
