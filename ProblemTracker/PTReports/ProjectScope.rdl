@@ -188,7 +188,7 @@ Fields!NumDeferred.Value).ToString()</Label>
                   <Visible>true</Visible>
                 </DataLabel>
                 <Style>
-                  <BackgroundColor>DarkRed</BackgroundColor>
+                  <BackgroundColor>Firebrick</BackgroundColor>
                 </Style>
                 <Marker>
                   <Size>6pt</Size>
@@ -209,7 +209,7 @@ Fields!NumDeferred.Value).ToString()</Label>
                   <Visible>true</Visible>
                 </DataLabel>
                 <Style>
-                  <BackgroundColor>DeepSkyBlue</BackgroundColor>
+                  <BackgroundColor>LightSkyBlue</BackgroundColor>
                 </Style>
                 <Marker>
                   <Size>6pt</Size>

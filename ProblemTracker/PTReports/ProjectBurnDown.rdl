@@ -248,7 +248,7 @@ FROM ActiveProjects</CommandText>
                 </DataValues>
                 <DataLabel />
                 <Style>
-                  <BackgroundColor>PowderBlue</BackgroundColor>
+                  <BackgroundColor>LightSkyBlue</BackgroundColor>
                   <BorderColor>
                     <Default>Black</Default>
                   </BorderColor>
@@ -272,7 +272,7 @@ FROM ActiveProjects</CommandText>
                 </DataValues>
                 <DataLabel />
                 <Style>
-                  <BackgroundColor>DarkCyan</BackgroundColor>
+                  <BackgroundColor>Firebrick</BackgroundColor>
                 </Style>
                 <Marker>
                   <Size>6pt</Size>
