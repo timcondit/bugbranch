@@ -187,6 +187,19 @@ Fields!NumDeferred.Value).ToString()</Label>
                   <Value>=Fields!NumAssigned.Value</Value>
                   <Visible>true</Visible>
                 </DataLabel>
+                <Action>
+                  <Drillthrough>
+                    <ReportName>ProjectIssuesByStatus</ReportName>
+                    <Parameters>
+                      <Parameter Name="Project">
+                        <Value>=Fields!Project.Value</Value>
+                      </Parameter>
+                      <Parameter Name="Status">
+                        <Value>Assigned</Value>
+                      </Parameter>
+                    </Parameters>
+                  </Drillthrough>
+                </Action>
                 <Style>
                   <BackgroundColor>Firebrick</BackgroundColor>
                 </Style>
@@ -208,6 +221,19 @@ Fields!NumDeferred.Value).ToString()</Label>
                   <Value>=Fields!NumResolved.Value</Value>
                   <Visible>true</Visible>
                 </DataLabel>
+                <Action>
+                  <Drillthrough>
+                    <ReportName>ProjectIssuesByStatus</ReportName>
+                    <Parameters>
+                      <Parameter Name="Project">
+                        <Value>=Fields!Project.Value</Value>
+                      </Parameter>
+                      <Parameter Name="Status">
+                        <Value>Resolved</Value>
+                      </Parameter>
+                    </Parameters>
+                  </Drillthrough>
+                </Action>
                 <Style>
                   <BackgroundColor>LightSkyBlue</BackgroundColor>
                 </Style>
@@ -229,6 +255,19 @@ Fields!NumDeferred.Value).ToString()</Label>
                   <Value>=Fields!NumClosed.Value</Value>
                   <Visible>true</Visible>
                 </DataLabel>
+                <Action>
+                  <Drillthrough>
+                    <ReportName>ProjectIssuesByStatus</ReportName>
+                    <Parameters>
+                      <Parameter Name="Project">
+                        <Value>=Fields!Project.Value</Value>
+                      </Parameter>
+                      <Parameter Name="Status">
+                        <Value>Closed</Value>
+                      </Parameter>
+                    </Parameters>
+                  </Drillthrough>
+                </Action>
                 <Style>
                   <BackgroundColor>LightCyan</BackgroundColor>
                 </Style>
@@ -265,6 +304,7 @@ Fields!NumDeferred.Value).ToString()</Label>
     </ReportItems>
     <Height>5in</Height>
   </Body>
+  <AutoRefresh>300</AutoRefresh>
   <Language>en-US</Language>
   <TopMargin>1in</TopMargin>
 </Report>

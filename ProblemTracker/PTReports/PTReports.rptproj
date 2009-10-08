@@ -32,6 +32,10 @@
       <Name>WeeklyTrends.rdl</Name>
       <FullPath>WeeklyTrends.rdl</FullPath>
     </ProjectItem>
+    <ProjectItem>
+      <Name>ProjectIssuesByStatus.rdl</Name>
+      <FullPath>ProjectIssuesByStatus.rdl</FullPath>
+    </ProjectItem>
   </Reports>
   <Configurations>
     <Configuration>
