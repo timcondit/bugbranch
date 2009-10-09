@@ -15,7 +15,7 @@
   <BottomMargin>1in</BottomMargin>
   <rd:ReportID>36c19856-fda4-4834-8652-7ee7fcbecbdc</rd:ReportID>
   <DataSets>
-    <DataSet Name="DevWorklooad">
+    <DataSet Name="ProjectScope">
       <Fields>
         <Field Name="Project">
           <DataField>Project</DataField>
@@ -51,13 +51,12 @@
 	dbo.GetNumIssuesByProjectStatus(Project, 'Closed') AS NumClosed,
 	dbo.GetNumIssuesByProjectStatus(Project, 'Deferred') AS NumDeferred
 FROM ActiveProjects
-WHERE Project &lt;&gt; 'Engineering Build'
 ORDER BY Project</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
     </DataSet>
   </DataSets>
-  <Width>7.5in</Width>
+  <Width>10in</Width>
   <Body>
     <ReportItems>
       <Chart Name="chart1">
@@ -73,7 +72,9 @@ ORDER BY Project</CommandText>
         <CategoryAxis>
           <Axis>
             <Title />
-            <Style />
+            <Style>
+              <FontSize>14pt</FontSize>
+            </Style>
             <MajorGridLines>
               <Style>
                 <BorderStyle>
@@ -93,7 +94,7 @@ ORDER BY Project</CommandText>
           </Axis>
         </CategoryAxis>
         <ZIndex>1</ZIndex>
-        <DataSetName>DevWorklooad</DataSetName>
+        <DataSetName>ProjectScope</DataSetName>
         <PlotArea>
           <Style>
             <BackgroundColor>LightGrey</BackgroundColor>
@@ -152,7 +153,7 @@ ORDER BY Project</CommandText>
           </Axis>
         </ValueAxis>
         <Type>Column</Type>
-        <Width>7.375in</Width>
+        <Width>9.875in</Width>
         <CategoryGroupings>
           <CategoryGrouping>
             <DynamicCategories>
@@ -282,7 +283,7 @@ Fields!NumDeferred.Value).ToString()</Label>
           <BackgroundColor>White</BackgroundColor>
         </Style>
         <Title />
-        <Height>4.375in</Height>
+        <Height>6.375in</Height>
       </Chart>
       <Textbox Name="textbox1">
         <rd:DefaultName>textbox1</rd:DefaultName>
@@ -302,7 +303,7 @@ Fields!NumDeferred.Value).ToString()</Label>
         <Value>Project Scope</Value>
       </Textbox>
     </ReportItems>
-    <Height>5in</Height>
+    <Height>7in</Height>
   </Body>
   <AutoRefresh>300</AutoRefresh>
   <Language>en-US</Language>
