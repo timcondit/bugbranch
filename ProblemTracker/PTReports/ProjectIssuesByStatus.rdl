@@ -27,7 +27,7 @@
   <BottomMargin>1in</BottomMargin>
   <rd:ReportID>7c78b127-5288-4646-93d5-eed1c3d3507c</rd:ReportID>
   <DataSets>
-    <DataSet Name="ETCMDataSource">
+    <DataSet Name="Issues">
       <Fields>
         <Field Name="PRN">
           <DataField>PRN</DataField>
@@ -99,7 +99,8 @@
         <CommandText>SELECT     PRN, RequestType, Title, AssignedTo, ReportedBy, Status, Priority, Severity, DateReported, DateFixed, DateClosed, AssignedToProject, 
                       ReportedInVersion, CodeReviewed, Product, Component
 FROM         Issue
-WHERE     (AssignedToProject = @Project) AND (Status = @Status)</CommandText>
+WHERE     (AssignedToProject = @Project) AND (Status = @Status)
+ORDER BY AssignedTo, PRN</CommandText>
         <QueryParameters>
           <QueryParameter Name="@Project">
             <Value>=Parameters!Project.Value</Value>
@@ -165,9 +166,9 @@ WHERE     (AssignedToProject = @Project) AND (Status = @Status)</CommandText>
       </Textbox>
       <Table Name="table1">
         <ZIndex>2</ZIndex>
-        <DataSetName>ETCMDataSource</DataSetName>
+        <DataSetName>Issues</DataSetName>
         <Top>1in</Top>
-        <Width>10.875in</Width>
+        <Width>10.375in</Width>
         <Details>
           <TableRows>
             <TableRow>
@@ -641,10 +642,10 @@ WHERE     (AssignedToProject = @Project) AND (Status = @Status)</CommandText>
         </Header>
         <TableColumns>
           <TableColumn>
-            <Width>1in</Width>
+            <Width>0.625in</Width>
           </TableColumn>
           <TableColumn>
-            <Width>0.875in</Width>
+            <Width>0.75in</Width>
           </TableColumn>
           <TableColumn>
             <Width>0.875in</Width>

@@ -17,8 +17,12 @@
       <FullPath>DevWorkload.rdl</FullPath>
     </ProjectItem>
     <ProjectItem>
-      <Name>ProjectBurndown.rdl</Name>
+      <Name>ProjectBurnDown.rdl</Name>
       <FullPath>ProjectBurnDown.rdl</FullPath>
+    </ProjectItem>
+    <ProjectItem>
+      <Name>ProjectIssuesByStatus.rdl</Name>
+      <FullPath>ProjectIssuesByStatus.rdl</FullPath>
     </ProjectItem>
     <ProjectItem>
       <Name>ProjectScope.rdl</Name>
@@ -31,10 +35,6 @@
     <ProjectItem>
       <Name>WeeklyTrends.rdl</Name>
       <FullPath>WeeklyTrends.rdl</FullPath>
-    </ProjectItem>
-    <ProjectItem>
-      <Name>ProjectIssuesByStatus.rdl</Name>
-      <FullPath>ProjectIssuesByStatus.rdl</FullPath>
     </ProjectItem>
   </Reports>
   <Configurations>
