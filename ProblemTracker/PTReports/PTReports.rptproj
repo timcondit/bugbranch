@@ -42,7 +42,7 @@
       <Name>Debug</Name>
       <Platform>Win32</Platform>
       <Options>
-        <TargetServerURL>http://alliance5/ReportServer</TargetServerURL>
+        <TargetServerURL>http://localhost/ReportServer</TargetServerURL>
         <TargetFolder>PTReports</TargetFolder>
         <TargetDataSourceFolder>PTReports/Data Sources</TargetDataSourceFolder>
       </Options>
@@ -51,16 +51,18 @@
       <Name>DebugLocal</Name>
       <Platform>Win32</Platform>
       <Options>
+        <TargetServerURL>http://localhost/ReportServer</TargetServerURL>
         <TargetFolder>PTReports</TargetFolder>
-        <TargetDataSourceFolder>Data Sources</TargetDataSourceFolder>
+        <TargetDataSourceFolder>PTReports/Data Sources</TargetDataSourceFolder>
       </Options>
     </Configuration>
     <Configuration>
       <Name>Production</Name>
       <Platform>Win32</Platform>
       <Options>
+        <TargetServerURL>http://localhost/ReportServer</TargetServerURL>
         <TargetFolder>PTReports</TargetFolder>
-        <TargetDataSourceFolder>Data Sources</TargetDataSourceFolder>
+        <TargetDataSourceFolder>PTReports/Data Sources</TargetDataSourceFolder>
       </Options>
     </Configuration>
   </Configurations>
