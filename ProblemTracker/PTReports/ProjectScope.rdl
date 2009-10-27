@@ -56,7 +56,7 @@ ORDER BY Project</CommandText>
       </Query>
     </DataSet>
   </DataSets>
-  <Width>10in</Width>
+  <Width>6.5in</Width>
   <Body>
     <ReportItems>
       <Chart Name="chart1">
@@ -72,9 +72,7 @@ ORDER BY Project</CommandText>
         <CategoryAxis>
           <Axis>
             <Title />
-            <Style>
-              <FontSize>14pt</FontSize>
-            </Style>
+            <Style />
             <MajorGridLines>
               <Style>
                 <BorderStyle>
@@ -114,13 +112,13 @@ ORDER BY Project</CommandText>
           <SeriesGrouping>
             <StaticSeries>
               <StaticMember>
-                <Label>Num Assigned</Label>
+                <Label>Assigned</Label>
               </StaticMember>
               <StaticMember>
-                <Label>Num Resolved</Label>
+                <Label>Resolved</Label>
               </StaticMember>
               <StaticMember>
-                <Label>Num Closed</Label>
+                <Label>Closed</Label>
               </StaticMember>
             </StaticSeries>
           </SeriesGrouping>
@@ -130,6 +128,7 @@ ORDER BY Project</CommandText>
         <ValueAxis>
           <Axis>
             <Title />
+            <Style />
             <MajorGridLines>
               <ShowGridLines>true</ShowGridLines>
               <Style>
@@ -153,7 +152,6 @@ ORDER BY Project</CommandText>
           </Axis>
         </ValueAxis>
         <Type>Column</Type>
-        <Width>9.875in</Width>
         <CategoryGroupings>
           <CategoryGrouping>
             <DynamicCategories>
@@ -283,11 +281,9 @@ Fields!NumDeferred.Value).ToString()</Label>
           <BackgroundColor>White</BackgroundColor>
         </Style>
         <Title />
-        <Height>6.375in</Height>
       </Chart>
       <Textbox Name="textbox1">
         <rd:DefaultName>textbox1</rd:DefaultName>
-        <Width>7.375in</Width>
         <Style>
           <Color>SteelBlue</Color>
           <FontFamily>Tahoma</FontFamily>
@@ -300,10 +296,10 @@ Fields!NumDeferred.Value).ToString()</Label>
         </Style>
         <CanGrow>true</CanGrow>
         <Height>0.36in</Height>
-        <Value>Project Scope</Value>
+        <Value>Engineering Projects</Value>
       </Textbox>
     </ReportItems>
-    <Height>7in</Height>
+    <Height>4.375in</Height>
   </Body>
   <AutoRefresh>300</AutoRefresh>
   <Language>en-US</Language>
