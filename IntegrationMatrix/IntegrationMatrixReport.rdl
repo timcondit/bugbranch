@@ -60,20 +60,8 @@
       </Fields>
       <Query>
         <DataSourceName>IntegrationMatrix</DataSourceName>
-        <CommandText>select fg.Name FeatureGroupName, 
-          case when (fsg.Name &lt;&gt; '') then fsg.Name else 'Base Features' end  FeatureSubGroupName, 
-          f.Name FeatureName,
-          s.Name Status
-from Matrix m
-join Integration i on m.Integration_ID=i.Integration_ID
-join PBX p on p.PBX_ID=i.PBX_ID
-join CTI c on c.CTI_ID=i.CTI_ID
-join Feature f on f.Feature_ID=m.Feature_ID
-join FeatureGroup fg on fg.FeatureGroup_ID=f.FeatureGroup_ID
-join FeatureSubGroup fsg on fsg.FeatureSubGroup_ID=f.FeatureSubGroup_ID
-join Status s on s.Status_ID=m.Status_ID
-where p.PBX_ID=@PBXId
-and c.CTI_ID=@CTIId</CommandText>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>GetIntegrationMatrix</CommandText>
         <QueryParameters>
           <QueryParameter Name="@PBXId">
             <Value>=Parameters!PBXId.Value</Value>
@@ -98,7 +86,8 @@ and c.CTI_ID=@CTIId</CommandText>
       </Fields>
       <Query>
         <DataSourceName>IntegrationMatrix</DataSourceName>
-        <CommandText>Select PBX_ID, [Name] from PBX Order By [Name]</CommandText>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>GetPBXs</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
     </DataSet>
@@ -115,7 +104,8 @@ and c.CTI_ID=@CTIId</CommandText>
       </Fields>
       <Query>
         <DataSourceName>IntegrationMatrix</DataSourceName>
-        <CommandText>Select CTI_ID, [Name] from CTI Order By [Name]</CommandText>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>GetCTIs</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
     </DataSet>
