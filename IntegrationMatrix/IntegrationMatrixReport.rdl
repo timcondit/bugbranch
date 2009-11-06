@@ -143,12 +143,6 @@
                 <GroupExpression>=Fields!FeatureGroupName.Value</GroupExpression>
               </GroupExpressions>
             </Grouping>
-            <Sorting>
-              <SortBy>
-                <SortExpression>=Fields!FeatureGroupName.Value</SortExpression>
-                <Direction>Ascending</Direction>
-              </SortBy>
-            </Sorting>
             <Header>
               <TableRows>
                 <TableRow>
@@ -288,12 +282,6 @@
                 <GroupExpression>=Fields!FeatureSubGroupName.Value</GroupExpression>
               </GroupExpressions>
             </Grouping>
-            <Sorting>
-              <SortBy>
-                <SortExpression>=Fields!FeatureSubGroupName.Value</SortExpression>
-                <Direction>Ascending</Direction>
-              </SortBy>
-            </Sorting>
             <Visibility>
               <Hidden>true</Hidden>
               <ToggleItem>FeatureGroupName</ToggleItem>
