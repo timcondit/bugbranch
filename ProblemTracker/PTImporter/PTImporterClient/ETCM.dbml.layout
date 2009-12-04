@@ -8,5 +8,11 @@
         <elementListCompartment Id="667c9d51-215f-4e07-8f85-96337e87142d" absoluteBounds="3.265, 1.96, 1.9700000000000002, 2.8370157877604165" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
+    <classShape Id="63fbf37c-dcda-4b4f-9a67-8a209490034d" absoluteBounds="0.875, 1.5, 2, 1.0961531575520833">
+      <DataClassMoniker Name="/ETCMDataContext/ETCMProperty" />
+      <nestedChildShapes>
+        <elementListCompartment Id="8a499183-1b1a-4909-9dbc-66960303c108" absoluteBounds="0.89000000000000012, 1.96, 1.9700000000000002, 0.53615315755208326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
   </nestedChildShapes>
 </ordesignerObjectsDiagram>

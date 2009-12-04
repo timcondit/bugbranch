@@ -25,16 +25,6 @@ namespace Envision.ConfigurationManagement.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost;Initial Catalog=ETCM;Integrated Security=True")]
-        public string ETCMConnectionString {
-            get {
-                return ((string)(this["ETCMConnectionString"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("C:\\temp\\")]
         public string ExportDirectory {
             get {
@@ -80,10 +70,11 @@ namespace Envision.ConfigurationManagement.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("20")]
-        public int HistoryMinutes {
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost;Initial Catalog=ETCM;Integrated Security=True")]
+        public string ETCMConnectionString {
             get {
-                return ((int)(this["HistoryMinutes"]));
+                return ((string)(this["ETCMConnectionString"]));
             }
         }
     }

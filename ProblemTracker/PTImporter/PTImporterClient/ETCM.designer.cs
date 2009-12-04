@@ -33,6 +33,9 @@ namespace Envision.ConfigurationManagement
     partial void InsertIssue(Issue instance);
     partial void UpdateIssue(Issue instance);
     partial void DeleteIssue(Issue instance);
+    partial void InsertETCMProperty(ETCMProperty instance);
+    partial void UpdateETCMProperty(ETCMProperty instance);
+    partial void DeleteETCMProperty(ETCMProperty instance);
     #endregion
 		
 		public ETCMDataContext() : 
@@ -70,6 +73,14 @@ namespace Envision.ConfigurationManagement
 			get
 			{
 				return this.GetTable<Issue>();
+			}
+		}
+		
+		public System.Data.Linq.Table<ETCMProperty> ETCMProperties
+		{
+			get
+			{
+				return this.GetTable<ETCMProperty>();
 			}
 		}
 	}
@@ -471,6 +482,92 @@ namespace Envision.ConfigurationManagement
 					this._Component = value;
 					this.SendPropertyChanged("Component");
 					this.OnComponentChanged();
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[Table(Name="dbo.ETCMProperty")]
+	public partial class ETCMProperty : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private string _PropertyName;
+		
+		private string _PropertyValue;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnPropertyNameChanging(string value);
+    partial void OnPropertyNameChanged();
+    partial void OnPropertyValueChanging(string value);
+    partial void OnPropertyValueChanged();
+    #endregion
+		
+		public ETCMProperty()
+		{
+			OnCreated();
+		}
+		
+		[Column(Storage="_PropertyName", DbType="NVarChar(450) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string PropertyName
+		{
+			get
+			{
+				return this._PropertyName;
+			}
+			set
+			{
+				if ((this._PropertyName != value))
+				{
+					this.OnPropertyNameChanging(value);
+					this.SendPropertyChanging();
+					this._PropertyName = value;
+					this.SendPropertyChanged("PropertyName");
+					this.OnPropertyNameChanged();
+				}
+			}
+		}
+		
+		[Column(Storage="_PropertyValue", DbType="NVarChar(1024)")]
+		public string PropertyValue
+		{
+			get
+			{
+				return this._PropertyValue;
+			}
+			set
+			{
+				if ((this._PropertyValue != value))
+				{
+					this.OnPropertyValueChanging(value);
+					this.SendPropertyChanging();
+					this._PropertyValue = value;
+					this.SendPropertyChanged("PropertyValue");
+					this.OnPropertyValueChanged();
 				}
 			}
 		}

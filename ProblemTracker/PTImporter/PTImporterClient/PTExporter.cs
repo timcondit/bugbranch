@@ -15,11 +15,15 @@ namespace Envision.ConfigurationManagement
     /// </summary>
     public class PTExporter
     {
+        public const string EXPORT_FILENAME = "PTRecords.csv";
+        public const string SCHEMA_FILENAME = "schema.ini";
+        public static readonly TimeSpan MAX_HISTORY = new TimeSpan(30, 0, 0, 0);
+        public static readonly DateTime PT_CREATED_DATE = new DateTime(2006, 2, 1);
+
         private static readonly ILog logger = LogManager.GetLogger(typeof(PTExporter));
-        private const int PT_EXPORT_DELAY = 15 * 1000; // 15 seconds
         private ISelenium selenium;
 
-        public bool Run(bool fullImport)
+        public bool Run(bool fullImport, DateTime? historyStart, DateTime? historyEnd)
         {
             bool success = false;
             bool didExport = false;
@@ -27,8 +31,8 @@ namespace Envision.ConfigurationManagement
             {
                 logger.Info("Start exporting issues from Problem Tracker...");
                 StartSelenium();
-                DeletePreviousFullExport();
-                DeletePreviousHistoryExport();
+                DeletePreviousExport();
+                CopyExportSchema();
                 Login();
                 if (fullImport)
                 {
@@ -38,8 +42,8 @@ namespace Envision.ConfigurationManagement
                 }
                 else
                 {
-                    NavigateToHistoryQuery();
-                    didExport = ExportHistoryQuery();
+                    NavigateToHistoryQuery((DateTime)historyStart, (DateTime)historyEnd);
+                    didExport = ExportHistoryQuery((DateTime)historyStart, (DateTime)historyEnd);
                 }
                 success = true;
             }
@@ -80,16 +84,21 @@ namespace Envision.ConfigurationManagement
             logger.Debug("Selenium stopped.");
         }
 
-        private void DeletePreviousFullExport()
+        private void DeletePreviousExport()
         {
             logger.Debug("Delete previous Problem Tracker export.");
+            File.Delete(Settings.Default.ExportDirectory + EXPORT_FILENAME);
             File.Delete(Settings.Default.ExportDirectory + Settings.Default.FullExportFile);
+            File.Delete(Settings.Default.ExportDirectory + Settings.Default.HistoryExportFile);
         }
 
-        private void DeletePreviousHistoryExport()
+        /// <summary>
+        /// ODBC works best when there's a schema.ini file along-side the csv file
+        /// </summary>
+        private void CopyExportSchema()
         {
-            logger.Debug("Delete previous Problem Tracker export.");
-            File.Delete(Settings.Default.ExportDirectory + Settings.Default.HistoryExportFile);
+            File.Delete(Settings.Default.ExportDirectory + SCHEMA_FILENAME);
+            File.Copy(SCHEMA_FILENAME, Settings.Default.ExportDirectory + SCHEMA_FILENAME, true);
         }
 
         private void Login()
@@ -128,16 +137,17 @@ namespace Envision.ConfigurationManagement
             logger.Debug("Navigated to full query.");
         }
 
-        private void NavigateToHistoryQuery()
+        private void NavigateToHistoryQuery(DateTime historyStart, DateTime historyEnd)
         {
-            logger.Debug("Navigating to history query for last " + Settings.Default.HistoryMinutes + " minutes...");
+            logger.Debug("Navigating to history query for timeframe (" + historyStart.ToString() + " - " + historyEnd.ToString() + ")...");
 
             selenium.Click("history");
             selenium.WaitForPageToLoad("30000");
             selenium.SelectFrame("relative=up");
             selenium.SelectFrame("contentFrame");
             selenium.Click("//input[@value='  Clear  ']");
-            selenium.Type("HistoryDate_after", DateTime.Now.AddMinutes(-Settings.Default.HistoryMinutes).ToString()); // get history of last hour
+            selenium.Type("HistoryDate_after", historyStart.ToString());
+            selenium.Type("HistoryDate_before", historyEnd.ToString());
             selenium.RemoveSelection("HistoryColumns", "value=ActionDate");
             selenium.RemoveSelection("HistoryColumns", "value=Action");
             selenium.RemoveSelection("HistoryColumns", "value=ActionBy");
@@ -166,6 +176,10 @@ namespace Envision.ConfigurationManagement
             selenium.Click("link=Export");
             System.Threading.Thread.Sleep(Settings.Default.FullExportDelayMS); // wait for the export to finish
 
+            // Rename the exported csv file
+            File.Move(Settings.Default.ExportDirectory + Settings.Default.FullExportFile,
+                Settings.Default.ExportDirectory + EXPORT_FILENAME);
+
             logger.Debug("Done exporting from Problem Tracker.");
         }
 
@@ -173,7 +187,7 @@ namespace Envision.ConfigurationManagement
         /// Export the history query from Problem Tracker
         /// </summary>
         /// <returns></returns>
-        private bool ExportHistoryQuery()
+        private bool ExportHistoryQuery(DateTime historyStart, DateTime historyEnd)
         {
             bool didExport = false;
             logger.Debug("Starting export from Problem Tracker...");
@@ -184,10 +198,14 @@ namespace Envision.ConfigurationManagement
                 selenium.Click("link=Export");
                 System.Threading.Thread.Sleep(Settings.Default.HistoryExportDelayMS); // wait for the export to finish
                 didExport = true;
+
+                // Rename the exported csv file
+                File.Move(Settings.Default.ExportDirectory + Settings.Default.HistoryExportFile,
+                    Settings.Default.ExportDirectory + EXPORT_FILENAME);
             }
             else
             {
-                logger.Info("There were no changes in the last " + Settings.Default.HistoryMinutes + " minutes.");
+                logger.Info("There were no changes in timeframe (" + historyStart.ToString() + " - " + historyEnd.ToString() + ").");
             }
 
             logger.Debug("Done exporting from Problem Tracker.");

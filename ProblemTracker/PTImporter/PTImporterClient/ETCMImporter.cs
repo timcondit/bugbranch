@@ -22,8 +22,7 @@ namespace Envision.ConfigurationManagement
             logger.Info("Starting import into ETCM database...");
 
             // Read the CSV file
-            string filename = fullImport ? Settings.Default.FullExportFile : Settings.Default.HistoryExportFile;
-            DataTable export = ReadCSV(filename);
+            DataTable export = ReadCSV();
 
             // Import the records into the ETCM database
             if (fullImport)
@@ -43,7 +42,7 @@ namespace Envision.ConfigurationManagement
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
-        private DataTable ReadCSV(string filename)
+        private DataTable ReadCSV()
         {
             DataTable ptTable = null;
             OdbcConnection ptConnection = null;
@@ -55,7 +54,7 @@ namespace Envision.ConfigurationManagement
 
                 // Setup the data reader/writer objects
                 ptConnection = new OdbcConnection("Driver={Microsoft Text Driver (*.txt; *.csv)};Dbq=" + Settings.Default.ExportDirectory + ";Extensions=csv,txt");
-                ptSelect = new OdbcCommand("SELECT * FROM " + filename, ptConnection);
+                ptSelect = new OdbcCommand("SELECT * FROM " + PTExporter.EXPORT_FILENAME, ptConnection);
                 ptAdapter = new OdbcDataAdapter(ptSelect);
 
                 // Read CSV file into DataTable
