@@ -23,7 +23,7 @@ namespace Envision.ConfigurationManagement
         private static readonly ILog logger = LogManager.GetLogger(typeof(PTExporter));
         private ISelenium selenium;
 
-        public bool Run(bool fullImport, DateTime? historyStart, DateTime? historyEnd)
+        public bool Run(DateTime? historyStart, DateTime? historyEnd)
         {
             bool success = false;
             bool didExport = false;
@@ -34,17 +34,8 @@ namespace Envision.ConfigurationManagement
                 DeletePreviousExport();
                 CopyExportSchema();
                 Login();
-                if (fullImport)
-                {
-                    NavigateToFullQuery();
-                    ExportFullQuery();
-                    didExport = true;
-                }
-                else
-                {
-                    NavigateToHistoryQuery((DateTime)historyStart, (DateTime)historyEnd);
-                    didExport = ExportHistoryQuery((DateTime)historyStart, (DateTime)historyEnd);
-                }
+                NavigateToHistoryQuery((DateTime)historyStart, (DateTime)historyEnd);
+                didExport = ExportHistoryQuery((DateTime)historyStart, (DateTime)historyEnd);
                 success = true;
             }
             catch (Exception e)
@@ -88,7 +79,6 @@ namespace Envision.ConfigurationManagement
         {
             logger.Debug("Delete previous Problem Tracker export.");
             File.Delete(Settings.Default.ExportDirectory + EXPORT_FILENAME);
-            File.Delete(Settings.Default.ExportDirectory + Settings.Default.FullExportFile);
             File.Delete(Settings.Default.ExportDirectory + Settings.Default.HistoryExportFile);
         }
 
@@ -121,22 +111,11 @@ namespace Envision.ConfigurationManagement
             logger.Debug("Logged in to Problem Tracker.");
         }
 
-        private void NavigateToFullQuery()
-        {
-            logger.Debug("Navigating to full query...");
-
-            selenium.Click("query");
-            selenium.WaitForPageToLoad("30000");
-            selenium.SelectFrame("relative=up");
-            selenium.SelectFrame("contentFrame");
-            selenium.Click("QueryList");
-            selenium.Select("QueryList", "label=PTImporter");
-            selenium.Click("Run");
-            selenium.WaitForPageToLoad("30000");
-
-            logger.Debug("Navigated to full query.");
-        }
-
+        /// <summary>
+        /// Navigate using Selenium RC to the history query for the specified time frame
+        /// </summary>
+        /// <param name="historyStart"></param>
+        /// <param name="historyEnd"></param>
         private void NavigateToHistoryQuery(DateTime historyStart, DateTime historyEnd)
         {
             logger.Debug("Navigating to history query for timeframe (" + historyStart.ToString() + " - " + historyEnd.ToString() + ")...");
@@ -167,24 +146,7 @@ namespace Envision.ConfigurationManagement
         }
 
         /// <summary>
-        /// Export the full query from Problem Tracker
-        /// </summary>
-        private void ExportFullQuery()
-        {
-            logger.Debug("Starting export from Problem Tracker...");
-
-            selenium.Click("link=Export");
-            System.Threading.Thread.Sleep(Settings.Default.FullExportDelayMS); // wait for the export to finish
-
-            // Rename the exported csv file
-            File.Move(Settings.Default.ExportDirectory + Settings.Default.FullExportFile,
-                Settings.Default.ExportDirectory + EXPORT_FILENAME);
-
-            logger.Debug("Done exporting from Problem Tracker.");
-        }
-
-        /// <summary>
-        /// Export the history query from Problem Tracker
+        /// Export the history query from Problem Tracker to a CSV file
         /// </summary>
         /// <returns></returns>
         private bool ExportHistoryQuery(DateTime historyStart, DateTime historyEnd)

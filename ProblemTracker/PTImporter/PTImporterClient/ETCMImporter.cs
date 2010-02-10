@@ -17,7 +17,7 @@ namespace Envision.ConfigurationManagement
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(ETCMImporter));
 
-        public void Run(bool fullImport)
+        public void Run()
         {
             logger.Info("Starting import into ETCM database...");
 
@@ -25,14 +25,7 @@ namespace Envision.ConfigurationManagement
             DataTable export = ReadCSV();
 
             // Import the records into the ETCM database
-            if (fullImport)
-            {
-                ImportFullExport(export);
-            }
-            else
-            {
-                ImportHistory(export);
-            }
+            ImportHistory(export);
 
             logger.Info("Done importing into ETCM database.");
         }
@@ -133,43 +126,6 @@ namespace Envision.ConfigurationManagement
                 }
 
                 logger.Debug("Done importing changed issues");
-            }
-            catch (Exception e)
-            {
-                logger.Error("Error imported changes into ETCM database", e);
-                throw e;
-            }
-        }
-
-        /// <summary>
-        /// Import given full export into SQL
-        /// </summary>
-        /// <param name="export"></param>
-        private void ImportFullExport(DataTable export)
-        {
-            try
-            {
-                logger.Debug("Importing full export which has " + export.Rows.Count + " records...");
-                
-                // Update and add issues
-                using (ETCMDataContext etcm = new ETCMDataContext())
-                {
-                    foreach (DataRow exportedRow in export.Rows)
-                    {
-                        Issue issue = new Issue();
-                        UpdateIssue(issue, exportedRow);
-                        etcm.Issues.InsertOnSubmit(issue);
-                    }
-
-                    logger.Debug("Truncate issues");
-                    etcm.ExecuteCommand("TRUNCATE TABLE Issue");
-
-                    logger.Debug("Insert all issues");
-                    etcm.SubmitChanges();
-                    logger.Debug("Done inserting issues");
-                }
-
-                logger.Debug("Done importing full export.");
             }
             catch (Exception e)
             {

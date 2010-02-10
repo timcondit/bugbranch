@@ -25,25 +25,16 @@ namespace Envision.ConfigurationManagement
             importer = new ETCMImporter();
         }
 
-        public void Run(bool fullImport)
+        public void Run()
         {
             try
             {
                 logger.Info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
                 logger.Info("Starting Problem Tracker Importer");
                 logger.Info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-                logger.Info("Performing " + (fullImport ? "full" : "history") + " import");
+                logger.Info("Performing history import");
 
-                if (fullImport)
-                {
-                    // Make sure an export was performed before importing
-                    if (exporter.Run(true, null, null))
-                        importer.Run(true);
-                }
-                else
-                {
-                    RunHistoryImport();
-                }
+                RunHistoryImport();
             }
             catch (Exception ex)
             {
@@ -84,8 +75,8 @@ namespace Envision.ConfigurationManagement
 
                     logger.Info("Importing history from timeframe (" + historyStart.ToString() + " - " + historyEnd.ToString() + ").");
                     // Run the export, and if there is history to export, import it
-                    if (exporter.Run(false, historyStart, historyEnd))
-                        importer.Run(false);
+                    if (exporter.Run(historyStart, historyEnd))
+                        importer.Run();
 
                     // Update the last import time
                     if (lastImportProp == null)
@@ -105,8 +96,7 @@ namespace Envision.ConfigurationManagement
         {
             PTImporterClient p = new PTImporterClient();
 
-            bool fullImport = args.Length > 0 && args[0].ToLower() == "fullimport";
-            p.Run(fullImport);
+            p.Run();
         }
     }
 }
