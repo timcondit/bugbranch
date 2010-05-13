@@ -9,7 +9,7 @@ import os.path
 import sys
 
 config=ConfigParser.SafeConfigParser()
-config.read(os.path.join('F:/','Repositories','git','ETCM','CommitHooks','BugBranch','bugbranch', 'bugbranch.ini'))
+config.read(os.path.join('F:/','Repositories','git','ETCM','CommitHooks','BugBranch','bugbranch.ini'))
 
 DEBUG = os.path.normpath(config.get('runtime','debug'))
 
