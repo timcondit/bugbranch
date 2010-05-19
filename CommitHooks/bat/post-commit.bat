@@ -41,6 +41,9 @@ REM For more examples and pre-written hooks, see those in
 REM the Subversion repository at
 REM http://svn.collab.net/repos/svn/trunk/tools/hook-scripts/ and
 REM http://svn.collab.net/repos/svn/trunk/contrib/hook-scripts/
+
+REM Note, use TXN before the commit, and REV after
+
 @ECHO ON
 
 SETLOCAL

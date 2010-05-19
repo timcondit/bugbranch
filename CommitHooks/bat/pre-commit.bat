@@ -51,18 +51,20 @@ REM # the Subversion repository at
 REM # http://svn.collab.net/repos/svn/trunk/tools/hook-scripts/ and
 REM # http://svn.collab.net/repos/svn/trunk/contrib/hook-scripts/
 
+REM Note, use TXN before the commit, and REV after
+
 SETLOCAL
-SET REPOSITORY=%1
-SET TRANSACTION=%2
+SET REPOS=%1
+SET TXN=%2
 SET PERL=C:\strawberry\perl\bin\perl.exe
 
 REM Make sure that the log message is valid
-:: perl F:\Repositories\EPS\hooks\ValidateCommitMessage.pl %TRANSACTION% %REPOSITORY% 
-%PERL% F:\Repositories\EPS\hooks\ValidateCommitMessage.pl %TRANSACTION% %REPOSITORY% 
+:: perl F:\Repositories\EPS\hooks\ValidateCommitMessage.pl %TXN% %REPOS% 
+%PERL% F:\Repositories\EPS\hooks\ValidateCommitMessage.pl %TXN% %REPOS% 
 IF ERRORLEVEL 1 exit 1
 
 REM verify user is checking into the right place
-C:\Python26\python.exe F:\Repositories\EPS\hooks\bugbranch\bugbranchdriver.py %REPOSITORY% %TRANSACTION% 
+C:\Python26\python.exe F:\Repositories\EPS\hooks\bugbranch\bugbranchdriver.py %REPOS% %TXN% 
 IF ERRORLEVEL 1 exit 1
 
 REM # Check that the author of this commit has the rights to perform
