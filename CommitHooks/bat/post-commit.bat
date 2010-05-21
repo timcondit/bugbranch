@@ -56,4 +56,4 @@ REM SET REPOS=E:\SVN\MayaRepo
 REM SET REV=267
 REM ############################
 
-"C:\Python26\python.exe" "F:\Repositories\EPS\hooks\EmailCommit.py" %REPOS% %REV%
+"C:\Python26\python.exe" "F:\Production\EPS\hooks\EmailCommit.py" %REPOS% %REV%
