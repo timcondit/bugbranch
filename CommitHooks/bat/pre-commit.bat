@@ -57,13 +57,14 @@ SETLOCAL
 SET REPOS=%1
 SET TXN=%2
 SET PERL=C:\strawberry\perl\bin\perl.exe
+SET PYTHON=C:\Python26\python.exe
 
 REM Make sure that the log message is valid
 %PERL% F:\Production\EPS\hooks\ValidateCommitMessage.pl %TXN% %REPOS% 
 IF ERRORLEVEL 1 exit 1
 
 REM verify user is checking into the right place
-C:\Python26\python.exe F:\Production\EPS\hooks\bugbranch\bugbranchdriver.py %REPOS% %TXN% 
+%PYTHON% F:\Production\EPS\hooks\bugbranch\bugbranchdriver.py %REPOS% %TXN% 
 IF ERRORLEVEL 1 exit 1
 
 REM # Check that the author of this commit has the rights to perform

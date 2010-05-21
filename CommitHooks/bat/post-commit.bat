@@ -49,6 +49,7 @@ REM Note, use TXN before the commit, and REV after
 SETLOCAL
 SET REPOS="%1"
 SET REV="%2"
+SET PYTHON=C:\Python26\python.exe
 
 REM ############################
 REM FOR TESTING ONLY
@@ -56,4 +57,4 @@ REM SET REPOS=E:\SVN\MayaRepo
 REM SET REV=267
 REM ############################
 
-"C:\Python26\python.exe" "F:\Production\EPS\hooks\EmailCommit.py" %REPOS% %REV%
+%PYTHON% "F:\Production\EPS\hooks\EmailCommit.py" %REPOS% %REV%
