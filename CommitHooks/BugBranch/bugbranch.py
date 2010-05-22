@@ -15,7 +15,7 @@ import sys
 # "assigned-to-project" comparisons.
 
 config=ConfigParser.SafeConfigParser()
-config.read(os.path.join('F:/','Repositories','git','ETCM','CommitHooks','BugBranch','bugbranch.ini'))
+config.read(os.path.join('F:/','Repositories','ETCM','CommitHooks','BugBranch','bugbranch.ini'))
 
 SVNLOOK = os.path.normpath(config.get('runtime','svnlook'))
 DEBUG = os.path.normpath(config.get('runtime','debug'))
@@ -101,47 +101,47 @@ class NetResults(object):
         #   'Severity'/7, 'Priority'/8, 'Status'/9, 'Resolution'/10,
         #   'Fix Date'/11, 'Reported In Version'/12, 'Assigned to Project'/13
         conn = pyodbc.connect('''
-	    DRIVER={SQL Server};
-	    SERVER=PTCRUISER;
-	    DATABASE=ETCM;
-	    Trusted_Connection=yes''')
+            DRIVER={SQL Server};
+            SERVER=CHINOOK;
+            DATABASE=ProblemTracker;
+            Trusted_Connection=yes''')
         self.cursor = conn.cursor()
 
     def prn(self, prn):
         '''Returns the PRN contents as a list if found, or None'''
         record = self.cursor.execute('''
-	    SELECT PRN, Title, AssignedTo, Status
-	    FROM Issue
-	    WHERE PRN = ?
-	    ''', prn).fetchall()
+            SELECT PRN, Text1, Assignee, Status
+            FROM NRTracker.Records
+            WHERE PRN = ?
+            ''', prn).fetchall()
 
-	if len(record) <= 0:
-	    sys.stderr.write('Error: PRN number not found\n')
-	    sys.stderr.write('Maybe the ETCM database is being repopulated.  Try again in a few minutes.\n')
-	    sys.exit(1)
-	elif len(record) > 1:
-	    sys.stderr.write('Error: found too many PRNs (huh?)')
-	    sys.exit(1)
-	else:
-	    if DEBUG is True:
-		sys.stderr.write("[bugbranch] record[0].PRN: ")
-		sys.stderr.write(str(record[0].PRN))
-		sys.stderr.write("\n")
-		sys.stderr.write("[bugbranch] record[0].Title: ")
-		sys.stderr.write(str(record[0].Title))
-		sys.stderr.write("\n")
-		sys.stderr.write("[bugbranch] record[0].AssignedTo: ")
-		sys.stderr.write(str(record[0].AssignedTo))
-		sys.stderr.write("\n")
-		sys.stderr.write("[bugbranch] record[0].Status: ")
-		sys.stderr.write(str(record[0].Status))
-		sys.stderr.write("\n")
-	    return record[0]
+        if len(record) <= 0:
+            sys.stderr.write('Error: PRN number not found\n')
+            sys.stderr.write('Maybe the ETCM database is being repopulated.  Try again in a few minutes.\n')
+            sys.exit(1)
+        elif len(record) > 1:
+            sys.stderr.write('Error: found too many PRNs (huh?)')
+            sys.exit(1)
+        else:
+            if DEBUG is True:
+                sys.stderr.write("[bugbranch] record[0].PRN: ")
+                sys.stderr.write(str(record[0].PRN))
+                sys.stderr.write("\n")
+                sys.stderr.write("[bugbranch] record[0].Title: ")
+                sys.stderr.write(str(record[0].Title))
+                sys.stderr.write("\n")
+                sys.stderr.write("[bugbranch] record[0].AssignedTo: ")
+                sys.stderr.write(str(record[0].AssignedTo))
+                sys.stderr.write("\n")
+                sys.stderr.write("[bugbranch] record[0].Status: ")
+                sys.stderr.write(str(record[0].Status))
+                sys.stderr.write("\n")
+            return record[0]
 
     def name(self, name):
         '''Returns the Subversion name of a NetResults user'''
-	section = 'nr2svn'
-	ini_file = 'bugbranch.ini'
+        section = 'nr2svn'
+        ini_file = 'bugbranch.ini'
         try:
             return config.get(section,name)
         # Fatal errors.  Exit immediately.
@@ -150,10 +150,10 @@ class NetResults(object):
         except ConfigParser.NoOptionError:
             sys.exit('Error: user %s not found in %s' % (name, ini_file))
         except:
-	    # only print this if DEBUG
-	    sys.stderr.write("name: ")
-	    sys.stderr.write(str(name))
-	    sys.stderr.write("\n")
+            # only print this if DEBUG
+            sys.stderr.write("name: ")
+            sys.stderr.write(str(name))
+            sys.stderr.write("\n")
 
             sys.exit('Error: something broke in NetResults::name()')
 

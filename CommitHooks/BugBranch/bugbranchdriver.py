@@ -9,7 +9,7 @@ import os.path
 import sys
 
 config=ConfigParser.SafeConfigParser()
-config.read(os.path.join('F:/','Repositories','git','ETCM','CommitHooks','BugBranch','bugbranch.ini'))
+config.read(os.path.join('F:/','Repositories','ETCM','CommitHooks','BugBranch','bugbranch.ini'))
 
 DEBUG = os.path.normpath(config.get('runtime','debug'))
 
@@ -30,40 +30,40 @@ def checkbug(repos, txn):
 
     #if (svn_author != 'timc') and (svn_author != 'anthonyb') and (svn_author != 'dennish'):
     if (svn_author != 'timc') and (svn_author != 'anthonyb'):
-	sys.stderr.write("Test users: anthonyb, dennish, timc")
+        sys.stderr.write("Test users: anthonyb, dennish, timc")
         return
     else:
         nr = bugbranch.NetResults()
         nr_prn = nr.prn(svn_prn)
         # Get the author's full name from NetResults.  For now, at least, that
         # means fetching by index.
-        nr_name = nr.name(nr_prn.AssignedTo)
+        nr_name = nr.name(nr_prn.Assignee)
 
-	if DEBUG is True:
-	    # only print this if DEBUG
-	    sys.stderr.write("[bugbranchdriver.py] svn_prn: ")
-	    sys.stderr.write(str(svn_prn))
-	    sys.stderr.write("\n")
-	    sys.stderr.write("[bugbranchdriver.py] nr_name: ")
-	    sys.stderr.write(str(nr_name))
-	    sys.stderr.write("\n")
+        if DEBUG is True:
+            # only print this if DEBUG
+            sys.stderr.write("[bugbranchdriver.py] svn_prn: ")
+            sys.stderr.write(str(svn_prn))
+            sys.stderr.write("\n")
+            sys.stderr.write("[bugbranchdriver.py] nr_name: ")
+            sys.stderr.write(str(nr_name))
+            sys.stderr.write("\n")
 
     # do checks
     if nr_prn.Status != 'Assigned':
-	if DEBUG is True:
-	    sys.stderr.write("[bugbranchdriver.py] nr_prn.Status: ")
-	    sys.stderr.write(str(nr_prn.Status))
-	    sys.stderr.write("\n")
-	sys.exit("Commit failed: PRN%s is not Assigned (it's %s)" % (svn_prn, nr_prn.Status))
+        if DEBUG is True:
+            sys.stderr.write("[bugbranchdriver.py] nr_prn.Status: ")
+            sys.stderr.write(str(nr_prn.Status))
+            sys.stderr.write("\n")
+        sys.exit("Commit failed: PRN%s is not Assigned (it's %s)" % (svn_prn, nr_prn.Status))
 
     if int(svn_prn) != nr_prn.PRN:
-	if DEBUG is True:
-	    sys.stderr.write("[bugbranchdriver.py] svn_prn: ")
-	    sys.stderr.write(svn_prn)
-	    sys.stderr.write("\n")
-	    sys.stderr.write("[bugbranchdriver.py] nr_prn.PRN: ")
-	    sys.stderr.write(str(nr_prn.PRN))
-	    sys.stderr.write("\n")
+        if DEBUG is True:
+            sys.stderr.write("[bugbranchdriver.py] svn_prn: ")
+            sys.stderr.write(svn_prn)
+            sys.stderr.write("\n")
+            sys.stderr.write("[bugbranchdriver.py] nr_prn.PRN: ")
+            sys.stderr.write(str(nr_prn.PRN))
+            sys.stderr.write("\n")
         sys.exit('Commit failed: invalid PRN number (%s != %s)' % (
             svn_prn, nr_prn.PRN))
 
