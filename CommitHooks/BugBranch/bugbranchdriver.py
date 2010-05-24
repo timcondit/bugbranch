@@ -13,6 +13,14 @@ config.read(os.path.join('F:/','Repositories','ETCM','CommitHooks','BugBranch','
 
 DEBUG = os.path.normpath(config.get('runtime','debug'))
 
+# DRY from bugbranch.py
+# accept multiple arguments, print them all on one line
+def write_debug(*args):
+    for arg in args:
+	sys.stderr.write(arg),
+    sys.stderr.write("\n")
+
+
 def checkbug(repos, txn):
     # repos, txn come from commit hook (pre-commit.bat)
     svn = bugbranch.Subversion(repos, txn)
@@ -39,31 +47,18 @@ def checkbug(repos, txn):
         # means fetching by index.
         nr_name = nr.name(nr_prn.Assignee)
 
-        if DEBUG is True:
-            # only print this if DEBUG
-            sys.stderr.write("[bugbranchdriver.py] svn_prn: ")
-            sys.stderr.write(str(svn_prn))
-            sys.stderr.write("\n")
-            sys.stderr.write("[bugbranchdriver.py] nr_name: ")
-            sys.stderr.write(str(nr_name))
-            sys.stderr.write("\n")
+
+	DEBUG and write_debug("[driver] svn_prn: ", str(svn_prn))
+	DEBUG and write_debug("[driver] nr_name: ", str(nr_name))
 
     # do checks
     if nr_prn.Status != 'Assigned':
-        if DEBUG is True:
-            sys.stderr.write("[bugbranchdriver.py] nr_prn.Status: ")
-            sys.stderr.write(str(nr_prn.Status))
-            sys.stderr.write("\n")
+	DEBUG and write_debug("[driver] nr_prn.Status: ", str(nr_prn.Status))
         sys.exit("Commit failed: PRN%s is not Assigned (it's %s)" % (svn_prn, nr_prn.Status))
 
     if int(svn_prn) != nr_prn.PRN:
-        if DEBUG is True:
-            sys.stderr.write("[bugbranchdriver.py] svn_prn: ")
-            sys.stderr.write(svn_prn)
-            sys.stderr.write("\n")
-            sys.stderr.write("[bugbranchdriver.py] nr_prn.PRN: ")
-            sys.stderr.write(str(nr_prn.PRN))
-            sys.stderr.write("\n")
+	DEBUG and write_debug("[driver] svn_prn: ", str(svn_prn))
+	DEBUG and write_debug("[driver] nr_prn.PRN: ", str(nr_prn.PRN))
         sys.exit('Commit failed: invalid PRN number (%s != %s)' % (
             svn_prn, nr_prn.PRN))
 

@@ -6,7 +6,10 @@ import csv
 import pyodbc
 import os.path
 import re
-import subprocess
+import svn
+import svn.core
+import svn.fs
+import svn.repos
 import sys
 
 # NOTE: Use sys.stderr.write() to pass messages back to the calling process.
@@ -21,11 +24,18 @@ SVNLOOK = os.path.normpath(config.get('runtime','svnlook'))
 DEBUG = os.path.normpath(config.get('runtime','debug'))
 
 
+# accept multiple arguments, print them all on one line
+def write_debug(*args):
+    for arg in args:
+	sys.stderr.write(arg),
+    sys.stderr.write("\n")
+
 class Subversion(object):
     '''DOCSTRING'''
     def __init__(self, repos, txn):
-        self.repos = repos
-        self.txn = txn
+        self.repos = svn.core.svn_path_canonicalize(repos)
+	self.fs = svn.repos.svn_repos_fs(svn.repos.svn_repos_open(repos))
+        self.txn = svn.fs.svn_fs_open_txn(self.fs, txn)
 
     def prn(self):
         '''Returns the PRN number from a Subversion transaction, or None'''
@@ -75,22 +85,16 @@ class Subversion(object):
                 ''', re.VERBOSE|re.MULTILINE)
 
     def author(self):
-        '''DOCSTRING'''
-        p = subprocess.Popen([SVNLOOK, 'author', self.repos, '-t', self.txn],
-                stdin = subprocess.PIPE,
-                stdout = subprocess.PIPE,
-                stderr = subprocess.PIPE)
-        stdout_text, stderr_text = p.communicate(None)
-        return stdout_text.strip()
+        '''Returns the author of this transaction'''
+	tmp = svn.fs.svn_fs_txn_prop(self.txn, "svn:author")
+	DEBUG and write_debug("[bugbranch] author: ", tmp)
+	return tmp
 
     def __log(self):
         '''Returns the entire SVN log message (private method)'''
-        p = subprocess.Popen([SVNLOOK, 'log', self.repos, '-t', self.txn],
-                stdin = subprocess.PIPE,
-                stdout = subprocess.PIPE,
-                stderr = subprocess.PIPE)
-        stdout_text, stderr_text = p.communicate(None)
-        return stdout_text.strip()
+	tmp = svn.fs.svn_fs_txn_prop(self.txn, "svn:log")
+	DEBUG and write_debug("[bugbranch] log: ", tmp)
+	return tmp
 
 
 class NetResults(object):
@@ -110,32 +114,22 @@ class NetResults(object):
     def prn(self, prn):
         '''Returns the PRN contents as a list if found, or None'''
         record = self.cursor.execute('''
-            SELECT PRN, Text1, Assignee, Status
+            SELECT PRN, Text1, Assignee, Status, Pulldown8
             FROM NRTracker.Records
             WHERE PRN = ?
             ''', prn).fetchall()
 
         if len(record) <= 0:
-            sys.stderr.write('Error: PRN number not found\n')
-            sys.stderr.write('Maybe the ETCM database is being repopulated.  Try again in a few minutes.\n')
+            sys.stderr.write('What the deuce?  PRN number not found.\n')
             sys.exit(1)
         elif len(record) > 1:
             sys.stderr.write('Error: found too many PRNs (huh?)')
             sys.exit(1)
         else:
-            if DEBUG is True:
-                sys.stderr.write("[bugbranch] record[0].PRN: ")
-                sys.stderr.write(str(record[0].PRN))
-                sys.stderr.write("\n")
-                sys.stderr.write("[bugbranch] record[0].Title: ")
-                sys.stderr.write(str(record[0].Title))
-                sys.stderr.write("\n")
-                sys.stderr.write("[bugbranch] record[0].AssignedTo: ")
-                sys.stderr.write(str(record[0].AssignedTo))
-                sys.stderr.write("\n")
-                sys.stderr.write("[bugbranch] record[0].Status: ")
-                sys.stderr.write(str(record[0].Status))
-                sys.stderr.write("\n")
+	    DEBUG and write_debug("[bugbranch] record[0].PRN: ", str(record[0].PRN))
+	    DEBUG and write_debug("[bugbranch] record[0].Text1: ", str(record[0].Text1))
+	    DEBUG and write_debug("[bugbranch] record[0].Assignee: ", str(record[0].Assignee))
+	    DEBUG and write_debug("[bugbranch] record[0].Status: ", str(record[0].Status))
             return record[0]
 
     def name(self, name):
