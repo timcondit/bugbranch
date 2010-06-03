@@ -2,40 +2,42 @@
 '''DOCSTRING'''
 
 import ConfigParser
-import csv
 import pyodbc
 import os.path
 import re
-import svn
-import svn.core
-import svn.fs
-import svn.repos
+import subprocess
 import sys
+from svn import core, fs, repos
 
 # NOTE: Use sys.stderr.write() to pass messages back to the calling process.
 
 # TODO need a PRN project name to SVN branch name mapping to do
 # "assigned-to-project" comparisons.
 
-config=ConfigParser.SafeConfigParser()
-config.read(os.path.join('F:/','Repositories','ETCM','CommitHooks','BugBranch','bugbranch.ini'))
-
+INI_FILE = os.path.join('F:/','Repositories','ETCM.next','CommitHooks','BugBranch','bugbranch.ini')
+config = ConfigParser.SafeConfigParser()
+config.read(INI_FILE)
 SVNLOOK = os.path.normpath(config.get('runtime','svnlook'))
 DEBUG = os.path.normpath(config.get('runtime','debug'))
 
 
-# accept multiple arguments, print them all on one line
+# Accept multiple arguments, print them all on one line.  TODO this needs to be
+# in a utilities module somewhere, so it's accessible by all.
 def write_debug(*args):
     for arg in args:
-	sys.stderr.write(arg),
+        sys.stderr.write(arg),
     sys.stderr.write("\n")
 
 class Subversion(object):
     '''DOCSTRING'''
-    def __init__(self, repos, txn):
-        self.repos = svn.core.svn_path_canonicalize(repos)
-	self.fs = svn.repos.svn_repos_fs(svn.repos.svn_repos_open(repos))
-        self.txn = svn.fs.svn_fs_open_txn(self.fs, txn)
+    def __init__(self, repos_path, txn_name):
+        # these are for SVNLOOK/changed
+        self.rpath = repos_path
+        self.tname = txn_name
+
+        self.repos_path = core.svn_path_canonicalize(repos_path)
+        self.fs = repos.svn_repos_fs(repos.svn_repos_open(repos_path))
+        self.txn = fs.svn_fs_open_txn(self.fs, txn_name)
 
     def prn(self):
         '''Returns the PRN number from a Subversion transaction, or None'''
@@ -86,24 +88,135 @@ class Subversion(object):
 
     def author(self):
         '''Returns the author of this transaction'''
-	tmp = svn.fs.svn_fs_txn_prop(self.txn, "svn:author")
-	DEBUG and write_debug("[bugbranch] author: ", tmp)
-	return tmp
+        tmp = fs.svn_fs_txn_prop(self.txn, "svn:author")
+        if DEBUG is True: write_debug("[bugbranch] author: ", tmp)
+        return tmp
+
+    # Try to identify the branch based on the path in the transaction.  It's
+    # not a modified branch unless the transaction succeeds, so the name is
+    # misleading.  Fix it.
+    # Examples of matches for the branch:
+    #
+    # - current project:    \branches\projects\Viper
+    # - service packs:      \branches\M.m\maintenance\base
+    # - patch branches:     \branches\M.m\maintenance\M.m.SPpn, where pn>00
+    #
+    # returns "Viper", M.m, "Engineering Build" or None
+    def modified_branch(self):
+        '''Returns the branch for this transaction'''
+        # paths looks like ['A   path/to/file1.txt\r', 'M   path/to/file2.txt']
+        paths = self.changed().split('\n')
+        branch = None
+#        write_debug('paths[0]:', paths[0])
+#        write_debug('paths[-1]:', paths[-1])
+
+        # First assumption: all changed paths share a common root.  In other
+        # words, I won't check that all transactions are from the same branch.
+#        path = paths[0]
+        path = ""
+        try:
+            path = paths[-1]
+        except IndexError:
+            write_debug("What the deuce?")
+            write_debug("There doesn't seem to be anything in the transaction")
+        path_parts = os.path.normpath(path).split(os.sep)
+        write_debug("path_parts:", str(path_parts), "\n")
+
+        # DEBUG ignore the SVN status bits at the front of the path
+        if path_parts[0].endswith('branches'):
+#            write_debug("path_parts[0] endswith branches")
+            # continue chewing up the path, left to right
+            #
+            # Broadly, there are two choices here: projects, or M.m.  This
+            # should be moved into a configuration file after I understand it
+            # better.
+            if path_parts[1] == "projects":
+                if path_parts[2] == "Viper":
+#                    write_debug("path_parts[1] is Viper")
+                    branch = path_parts[2]
+                # this should never happen
+                else:
+                    return branch
+            else:
+                major, minor = path_parts[1].split('.')
+                try:
+                    int(major)
+                    int(minor)
+#                    write_debug("path_parts[1] is %s.%s" % (major, minor))
+                except:
+                    write_debug("unknown exception in modified_branch")
+                    write_debug("expected branches/MAJOR.MINOR")
+                    sys.exit(1)
+            # If we get here, it's either a service pack or patch branch.
+            # There's a small chance that someone will try to check into one
+            # of the old "MAJOR.MINOR/Initial/base" branches, but that's an
+            # error and I'm not going to check for it.
+            #
+            # There's no easy way to distinguish between service packs, for
+            # example 10.0.0100 and 10.0.0200.  They both go into the
+            # maintenance branch, and it's not profitable to try and tease
+            # them apart.
+            if path_parts[2] != "maintenance":
+                write_debug("unknown exception in modified_branch")
+                write_debug("expected branches/MAJOR.MINOR/maintenance")
+                sys.exit(1)
+
+            # FIXME If this particular base branch (or PRN branch for that
+            # matter) doesn't exist yet, this check will fail.
+            if path_parts[3] == "base":
+                # it's a service pack branch
+                branch = (major, minor)
+            else:
+#                write_debug("path_parts[3]:", path_parts[3])
+                try:
+                    # Should this be outside the try block?  It's potentially
+                    # unreachable otherwise.
+                    mjr, mnr, SPpn = path_parts[3].split('.')
+                    int(mjr)
+                    int(mnr)
+                    int(SPpn)
+                except:
+                    write_debug("unknown exception in modified_branch")
+                    write_debug("expected branches/MAJOR.MINOR/maintenance/M.m.SPpn")
+                    sys.exit(1)
+                # This is where I'd check if it's a service pack (ends in 00)
+                # or patch branch (ends in something other than 00).  But the
+                # SPpn number starts with a leading zero, so it is treated as
+                # octal...  Fortunately, I can take advantage of the fact that
+                # our patches have to use octal digits for a similar reason.
+                #
+                pn = SPpn[2:]  # if SPpn isn't a string, we're hosed
+                if int(pn) % 100:
+                    # it's a patch branch (but we already knew that)
+                    branch = "Engineering Build"
+                else:
+                    write_debug("(1) should never get here")
+                    sys.exit(1)
+        else:
+            sys.exit("Error: %s doesn't look like a branch path" % path_parts[0])
+        return branch
+
+    # should this method be private to Subversion?
+    def changed(self):
+        '''Returns the list of files changed in this transaction'''
+        p = subprocess.Popen([SVNLOOK, 'changed', self.rpath, '-t', self.tname],
+                stdin = subprocess.PIPE,
+                stdout = subprocess.PIPE,
+                stderr = subprocess.PIPE)
+        stdout_text, stderr_text = p.communicate(None)
+        if DEBUG is True: write_debug("[bugbranch] changed: ", tmp)
+        return stdout_text.strip()
 
     def __log(self):
         '''Returns the entire SVN log message (private method)'''
-	tmp = svn.fs.svn_fs_txn_prop(self.txn, "svn:log")
-	DEBUG and write_debug("[bugbranch] log: ", tmp)
-	return tmp
+        tmp = fs.svn_fs_txn_prop(self.txn, "svn:log")
+        if DEBUG is True: write_debug("[bugbranch] log: ", tmp)
+        return tmp
 
 
 class NetResults(object):
     '''DOCSTRING'''
     def __init__(self):
-        # fields (and indices) are 'PRN'/0, 'Product'/1, 'Component'/2,
-        #   'Title'/3, 'Assigned To'/4, 'Reported By'/5, 'Date Reported'/6,
-        #   'Severity'/7, 'Priority'/8, 'Status'/9, 'Resolution'/10,
-        #   'Fix Date'/11, 'Reported In Version'/12, 'Assigned to Project'/13
         conn = pyodbc.connect('''
             DRIVER={SQL Server};
             SERVER=CHINOOK;
@@ -118,37 +231,35 @@ class NetResults(object):
             FROM NRTracker.Records
             WHERE PRN = ?
             ''', prn).fetchall()
-
         if len(record) <= 0:
-            sys.stderr.write('What the deuce?  PRN number not found.\n')
+            # should be sys.exit('What the deuce?  PRN number not found.')
+            sys.stderr.write('What the deuce?  PRN number not found.')
             sys.exit(1)
         elif len(record) > 1:
+            # should be sys.exit('Error: found too many PRNs (huh?)')
             sys.stderr.write('Error: found too many PRNs (huh?)')
             sys.exit(1)
         else:
-	    DEBUG and write_debug("[bugbranch] record[0].PRN: ", str(record[0].PRN))
-	    DEBUG and write_debug("[bugbranch] record[0].Text1: ", str(record[0].Text1))
-	    DEBUG and write_debug("[bugbranch] record[0].Assignee: ", str(record[0].Assignee))
-	    DEBUG and write_debug("[bugbranch] record[0].Status: ", str(record[0].Status))
+            if DEBUG is True:
+                write_debug("[bugbranch] record[0].PRN: ", str(record[0].PRN))
+                write_debug("[bugbranch] record[0].Text1: ", str(record[0].Text1))
+                write_debug("[bugbranch] record[0].Assignee: ", str(record[0].Assignee))
+                write_debug("[bugbranch] record[0].Status: ", str(record[0].Status))
+                write_debug("[bugbranch] record[0].Pulldown8: ", str(record[0].Pulldown8))
             return record[0]
 
     def name(self, name):
-        '''Returns the Subversion name of a NetResults user'''
-        section = 'nr2svn'
-        ini_file = 'bugbranch.ini'
+        '''Returns the Subversion name of a ProblemTracker user'''
+        ini_section = 'pt2svn'
         try:
-            return config.get(section,name)
+            return config.get(ini_section,name)
         # Fatal errors.  Exit immediately.
         except ConfigParser.NoSectionError:
-            sys.exit('Error: config file missing section %s (!)' % section)
+            sys.exit('Error: config file missing section %s (!)' % ini_section)
         except ConfigParser.NoOptionError:
-            sys.exit('Error: user %s not found in %s' % (name, ini_file))
+            sys.exit('Error: user %s not found in %s' % (name, INI_FILE))
         except:
-            # only print this if DEBUG
-            sys.stderr.write("name: ")
-            sys.stderr.write(str(name))
-            sys.stderr.write("\n")
-
+            if DEBUG is True: write_debug("name: ", str(name), "\n")
             sys.exit('Error: something broke in NetResults::name()')
 
     def DEBUG_prn_summary(self):
@@ -189,14 +300,13 @@ class NetResults(object):
 #print 'Total bugs: %s' % (total)
 
 
-
 if __name__ == '__main__':
     # get SVN data - it's not a commit hook yet, so it uses the last
     # completed transaction (instead of the current one) for testing
-#    repos = sys.argv[1]
-#    txn = sys.argv[2]
+    repos = sys.argv[1]
+    txn = sys.argv[2]
+    svn = Subversion(repos, txn)
 
-    svn = Subversion()
     svn_prn = svn.prn()
     svn_separator = svn.separator()
     svn_commit_text = svn.commit_text()
