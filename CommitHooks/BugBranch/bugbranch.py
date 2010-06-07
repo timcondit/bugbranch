@@ -28,6 +28,9 @@ def write_debug(*args):
         sys.stderr.write(arg),
     sys.stderr.write("\n")
 
+# NOTE: I'm changing the "delivery model" here.  Rather than expose a bunch of
+# methods and have the driver sort it out, the Subversion class will expose
+# one method that will round up all relevant data and return a dict.
 class Subversion(object):
     '''DOCSTRING'''
     def __init__(self, repos_path, txn_name):
@@ -39,6 +42,17 @@ class Subversion(object):
         self.fs = repos.svn_repos_fs(repos.svn_repos_open(repos_path))
         self.txn = fs.svn_fs_open_txn(self.fs, txn_name)
 
+        self.details = {}
+
+    def details(self):
+        '''DOCSTRING'''
+        self.details['prn'] = self.prn() or None
+        self.details['commit_text'] = self.commit_text() or None
+        self.details['author'] = self.author() or None
+        self.details['branch'] = self.modified_branch() or None
+        return self.details
+
+    # TODO make private
     def prn(self):
         '''Returns the PRN number from a Subversion transaction, or None'''
         try:
@@ -50,6 +64,7 @@ class Subversion(object):
             sys.exit("Where's the commit message?")
         return None
 
+    # TODO make private
     def separator(self):
         '''A completely useless method'''
         # If this method causes trouble, delete it.
@@ -61,6 +76,7 @@ class Subversion(object):
             sys.exit("Where's the commit message?")
         return None
 
+    # TODO make private
     def commit_text(self):
         '''Returns the commit text from a Subversion transaction, or None'''
         try:
@@ -72,6 +88,7 @@ class Subversion(object):
             sys.exit("Where's the commit message?")
         return None
 
+    # TODO make private
     def commit_re(self):
         '''Returns a regular expression that matches valid commit messages'''
         # re.MULTILINE may not be appropriate here
@@ -86,6 +103,7 @@ class Subversion(object):
                 (?P<commit_text>\w+)        # match commit message text
                 ''', re.VERBOSE|re.MULTILINE)
 
+    # TODO make private
     def author(self):
         '''Returns the author of this transaction'''
         tmp = fs.svn_fs_txn_prop(self.txn, "svn:author")
@@ -102,6 +120,8 @@ class Subversion(object):
     # - patch branches:     \branches\M.m\maintenance\M.m.SPpn, where pn>00
     #
     # returns "Viper", M.m, "Engineering Build" or None
+    #
+    # TODO make private
     def modified_branch(self):
         '''Returns the branch for this transaction'''
         # paths looks like ['A   path/to/file1.txt\r', 'M   path/to/file2.txt']
@@ -124,7 +144,7 @@ class Subversion(object):
 
         # DEBUG ignore the SVN status bits at the front of the path
         if path_parts[0].endswith('branches'):
-#            write_debug("path_parts[0] endswith branches")
+            write_debug("path_parts[0] endswith branches")
             # continue chewing up the path, left to right
             #
             # Broadly, there are two choices here: projects, or M.m.  This
@@ -132,7 +152,7 @@ class Subversion(object):
             # better.
             if path_parts[1] == "projects":
                 if path_parts[2] == "Viper":
-#                    write_debug("path_parts[1] is Viper")
+                    write_debug("path_parts[1] is Viper")
                     branch = path_parts[2]
                 # this should never happen
                 else:
@@ -142,7 +162,7 @@ class Subversion(object):
                 try:
                     int(major)
                     int(minor)
-#                    write_debug("path_parts[1] is %s.%s" % (major, minor))
+                    write_debug("path_parts[1] is %s.%s" % (major, minor))
                 except:
                     write_debug("unknown exception in modified_branch")
                     write_debug("expected branches/MAJOR.MINOR")
@@ -167,7 +187,7 @@ class Subversion(object):
                 # it's a service pack branch
                 branch = (major, minor)
             else:
-#                write_debug("path_parts[3]:", path_parts[3])
+                write_debug("path_parts[3]:", path_parts[3])
                 try:
                     # Should this be outside the try block?  It's potentially
                     # unreachable otherwise.
@@ -194,9 +214,11 @@ class Subversion(object):
                     sys.exit(1)
         else:
             sys.exit("Error: %s doesn't look like a branch path" % path_parts[0])
+        write_debug("branch: %s" % str(branch))
         return branch
 
     # should this method be private to Subversion?
+    # TODO make private
     def changed(self):
         '''Returns the list of files changed in this transaction'''
         p = subprocess.Popen([SVNLOOK, 'changed', self.rpath, '-t', self.tname],
