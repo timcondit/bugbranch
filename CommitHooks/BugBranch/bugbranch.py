@@ -29,8 +29,8 @@ def write_debug(*args):
     sys.stderr.write("\n")
 
 # NOTE: I'm changing the "delivery model" here.  Rather than expose a bunch of
-# methods and have the driver sort it out, the Subversion class will expose
-# one method that will round up all relevant data and return a dict.
+# methods and leave the driver to sort it out, the Subversion class will
+# expose one method that will round up all relevant data and return a dict.
 class Subversion(object):
     '''DOCSTRING'''
     def __init__(self, repos_path, txn_name):
@@ -44,52 +44,49 @@ class Subversion(object):
 
         self.details = {}
 
-    def details(self):
+    def get_details(self):
         '''DOCSTRING'''
-        self.details['prn'] = self.prn() or None
-        self.details['commit_text'] = self.commit_text() or None
-        self.details['author'] = self.author() or None
-        self.details['branch'] = self.modified_branch() or None
+        self.details['prn'] = self.__prn() or None
+        self.details['separator'] = self.__separator() or None
+        self.details['commit_text'] = self.__commit_text() or None
+        self.details['author'] = self.__author() or None
+        self.details['branch'] = self.__modified_branch() or None
         return self.details
 
-    # TODO make private
-    def prn(self):
+    def __prn(self):
         '''Returns the PRN number from a Subversion transaction, or None'''
         try:
-            return self.commit_re().match(self.__log()).group('prn_number')
+            return self.__commit_re().match(self.__log()).group('prn_number')
         # Fatal error.  Exit immediately.
         except IndexError:
-            sys.exit('Malformed commit message (PRN number missing?)')
+            sys.exit('[prn] Malformed commit message (PRN number missing?)')
         except AttributeError:
-            sys.exit("Where's the commit message?")
+            sys.exit("[prn] Where's the commit message?")
         return None
 
-    # TODO make private
-    def separator(self):
+    def __separator(self):
         '''A completely useless method'''
         # If this method causes trouble, delete it.
         try:
-            return self.commit_re().match(self.__log()).group('separator')
+            return self.__commit_re().match(self.__log()).group('separator')
         except IndexError:
-            sys.exit('Malformed commit message (separator missing?)')
+            sys.exit('[sep] Malformed commit message (separator missing?)')
         except AttributeError:
-            sys.exit("Where's the commit message?")
+            sys.exit("[sep] Where's the commit message?")
         return None
 
-    # TODO make private
-    def commit_text(self):
+    def __commit_text(self):
         '''Returns the commit text from a Subversion transaction, or None'''
         try:
-            return self.commit_re().match(self.__log()).group('commit_text')
+            return self.__commit_re().match(self.__log()).group('commit_text')
         # Fatal error.  Exit immediately.
         except IndexError:
-            sys.exit('Malformed commit message (commit text missing?)')
+            sys.exit('[commit_text] Malformed commit message (commit text missing?)')
         except AttributeError:
-            sys.exit("Where's the commit message?")
+            sys.exit("[commit_text] Where's the commit message?")
         return None
 
-    # TODO make private
-    def commit_re(self):
+    def __commit_re(self):
         '''Returns a regular expression that matches valid commit messages'''
         # re.MULTILINE may not be appropriate here
         return re.compile(r'''
@@ -103,8 +100,7 @@ class Subversion(object):
                 (?P<commit_text>\w+)        # match commit message text
                 ''', re.VERBOSE|re.MULTILINE)
 
-    # TODO make private
-    def author(self):
+    def __author(self):
         '''Returns the author of this transaction'''
         tmp = fs.svn_fs_txn_prop(self.txn, "svn:author")
         if DEBUG is True: write_debug("[bugbranch] author: ", tmp)
@@ -120,12 +116,10 @@ class Subversion(object):
     # - patch branches:     \branches\M.m\maintenance\M.m.SPpn, where pn>00
     #
     # returns "Viper", M.m, "Engineering Build" or None
-    #
-    # TODO make private
-    def modified_branch(self):
+    def __modified_branch(self):
         '''Returns the branch for this transaction'''
         # paths looks like ['A   path/to/file1.txt\r', 'M   path/to/file2.txt']
-        paths = self.changed().split('\n')
+        paths = self.__changed().split('\n')
         branch = None
 #        write_debug('paths[0]:', paths[0])
 #        write_debug('paths[-1]:', paths[-1])
@@ -217,9 +211,7 @@ class Subversion(object):
         write_debug("branch: %s" % str(branch))
         return branch
 
-    # should this method be private to Subversion?
-    # TODO make private
-    def changed(self):
+    def __changed(self):
         '''Returns the list of files changed in this transaction'''
         p = subprocess.Popen([SVNLOOK, 'changed', self.rpath, '-t', self.tname],
                 stdin = subprocess.PIPE,
