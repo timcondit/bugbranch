@@ -103,7 +103,8 @@ class Subversion(object):
     def __author(self):
         '''Returns the author of this transaction'''
         tmp = fs.svn_fs_txn_prop(self.txn, "svn:author")
-        if DEBUG is True: write_debug("[bugbranch] author: ", tmp)
+        if DEBUG == "True":
+            write_debug("[author]: ", tmp)
         return tmp
 
     # Try to identify the branch based on the path in the transaction.  It's
@@ -115,30 +116,36 @@ class Subversion(object):
     # - service packs:      \branches\M.m\maintenance\base
     # - patch branches:     \branches\M.m\maintenance\M.m.SPpn, where pn>00
     #
-    # returns "Viper", M.m, "Engineering Build" or None
+    # returns "Viper", "M.m", "Patch" or None
     def __modified_branch(self):
-        '''Returns the branch for this transaction'''
+        '''Returns the branch for this transaction (string)'''
         # paths looks like ['A   path/to/file1.txt\r', 'M   path/to/file2.txt']
         paths = self.__changed().split('\n')
         branch = None
-#        write_debug('paths[0]:', paths[0])
-#        write_debug('paths[-1]:', paths[-1])
 
         # First assumption: all changed paths share a common root.  In other
         # words, I won't check that all transactions are from the same branch.
-#        path = paths[0]
+        #
+        # Use paths[-1] to get the "longest" path for cases like this:
+        # F:\Source\sandbox\branches>svn mkdir 9.10\maintenance\base --parents
+        # A         F:\Source\sandbox\branches\9.10
+        # A         F:\Source\sandbox\branches\9.10\maintenance
+        # A         F:\Source\sandbox\branches\9.10\maintenance\base
         path = ""
         try:
             path = paths[-1]
+        # This could happen ... when?
         except IndexError:
             write_debug("What the deuce?")
             write_debug("There doesn't seem to be anything in the transaction")
         path_parts = os.path.normpath(path).split(os.sep)
-        write_debug("path_parts:", str(path_parts), "\n")
+        if DEBUG == "True":
+            write_debug("path_parts:", str(path_parts), "\n")
 
         # DEBUG ignore the SVN status bits at the front of the path
         if path_parts[0].endswith('branches'):
-            write_debug("path_parts[0] endswith branches")
+            if DEBUG == "True":
+                write_debug("path_parts[0] endswith branches")
             # continue chewing up the path, left to right
             #
             # Broadly, there are two choices here: projects, or M.m.  This
@@ -146,9 +153,11 @@ class Subversion(object):
             # better.
             if path_parts[1] == "projects":
                 if path_parts[2] == "Viper":
-                    write_debug("path_parts[1] is Viper")
                     branch = path_parts[2]
-                # this should never happen
+                    if DEBUG == "True":
+                        write_debug("path_parts[2] is Viper")
+                # TODO This should never happen.  So I should flag it as
+                # exceptional rather than just returning it as normal.
                 else:
                     return branch
             else:
@@ -156,11 +165,13 @@ class Subversion(object):
                 try:
                     int(major)
                     int(minor)
-                    write_debug("path_parts[1] is %s.%s" % (major, minor))
+                    if DEBUG == "True":
+                        write_debug("path_parts[1] is %s.%s" % (major, minor))
                 except:
-                    write_debug("unknown exception in modified_branch")
-                    write_debug("expected branches/MAJOR.MINOR")
+                    write_debug("[modbranch] unknown exception")
+                    write_debug("[modbranch] expected branches/MAJOR.MINOR")
                     sys.exit(1)
+
             # If we get here, it's either a service pack or patch branch.
             # There's a small chance that someone will try to check into one
             # of the old "MAJOR.MINOR/Initial/base" branches, but that's an
@@ -171,8 +182,8 @@ class Subversion(object):
             # maintenance branch, and it's not profitable to try and tease
             # them apart.
             if path_parts[2] != "maintenance":
-                write_debug("unknown exception in modified_branch")
-                write_debug("expected branches/MAJOR.MINOR/maintenance")
+                write_debug("[modbranch] unknown exception")
+                write_debug("[modbranch] expected branches/MAJOR.MINOR/maintenance")
                 sys.exit(1)
 
             # FIXME If this particular base branch (or PRN branch for that
@@ -181,7 +192,8 @@ class Subversion(object):
                 # it's a service pack branch
                 branch = (major, minor)
             else:
-                write_debug("path_parts[3]:", path_parts[3])
+                if DEBUG == "True":
+                    write_debug("path_parts[3]:", path_parts[3])
                 try:
                     # Should this be outside the try block?  It's potentially
                     # unreachable otherwise.
@@ -190,8 +202,8 @@ class Subversion(object):
                     int(mnr)
                     int(SPpn)
                 except:
-                    write_debug("unknown exception in modified_branch")
-                    write_debug("expected branches/MAJOR.MINOR/maintenance/M.m.SPpn")
+                    write_debug("[modbranch] unknown exception in modified_branch")
+                    write_debug("[modbranch] expected branches/MAJOR.MINOR/maintenance/M.m.SPpn")
                     sys.exit(1)
                 # This is where I'd check if it's a service pack (ends in 00)
                 # or patch branch (ends in something other than 00).  But the
@@ -204,11 +216,12 @@ class Subversion(object):
                     # it's a patch branch (but we already knew that)
                     branch = "Engineering Build"
                 else:
-                    write_debug("(1) should never get here")
+                    write_debug("[modbranch] should never get here")
                     sys.exit(1)
         else:
             sys.exit("Error: %s doesn't look like a branch path" % path_parts[0])
-        write_debug("branch: %s" % str(branch))
+        if DEBUG == "True":
+            write_debug("branch: %s" % str(branch))
         return branch
 
     def __changed(self):
@@ -218,13 +231,16 @@ class Subversion(object):
                 stdout = subprocess.PIPE,
                 stderr = subprocess.PIPE)
         stdout_text, stderr_text = p.communicate(None)
-        if DEBUG is True: write_debug("[bugbranch] changed: ", tmp)
+        if DEBUG == "True":
+            write_debug("[changed] stdout:", stdout_text)
+            write_debug("[changed] stderr:", stderr_text)
         return stdout_text.strip()
 
     def __log(self):
         '''Returns the entire SVN log message (private method)'''
         tmp = fs.svn_fs_txn_prop(self.txn, "svn:log")
-        if DEBUG is True: write_debug("[bugbranch] log: ", tmp)
+        if DEBUG == "True":
+            write_debug("[log]: ", tmp)
         return tmp
 
 
@@ -254,7 +270,7 @@ class NetResults(object):
             sys.stderr.write('Error: found too many PRNs (huh?)')
             sys.exit(1)
         else:
-            if DEBUG is True:
+            if DEBUG == "True":
                 write_debug("[bugbranch] record[0].PRN: ", str(record[0].PRN))
                 write_debug("[bugbranch] record[0].Text1: ", str(record[0].Text1))
                 write_debug("[bugbranch] record[0].Assignee: ", str(record[0].Assignee))
@@ -273,7 +289,8 @@ class NetResults(object):
         except ConfigParser.NoOptionError:
             sys.exit('Error: user %s not found in %s' % (name, INI_FILE))
         except:
-            if DEBUG is True: write_debug("name: ", str(name), "\n")
+            if DEBUG == "True":
+                write_debug("name: ", str(name), "\n")
             sys.exit('Error: something broke in NetResults::name()')
 
     def DEBUG_prn_summary(self):
