@@ -11,9 +11,6 @@ from svn import core, fs, repos
 
 # NOTE: Use sys.stderr.write() to pass messages back to the calling process.
 
-# TODO need a PRN project name to SVN branch name mapping to do
-# "assigned-to-project" comparisons.
-
 INI_FILE = os.path.join('F:/','Repositories','ETCM.next','CommitHooks','BugBranch','bugbranch.ini')
 config = ConfigParser.SafeConfigParser()
 config.read(INI_FILE)
@@ -42,16 +39,17 @@ class Subversion(object):
         self.fs = repos.svn_repos_fs(repos.svn_repos_open(repos_path))
         self.txn = fs.svn_fs_open_txn(self.fs, txn_name)
 
-        self.details = {}
-
     def get_details(self):
         '''DOCSTRING'''
-        self.details['prn'] = self.__prn() or None
-        self.details['separator'] = self.__separator() or None
-        self.details['commit_text'] = self.__commit_text() or None
-        self.details['author'] = self.__author() or None
-        self.details['branch'] = self.__modified_branch() or None
-        return self.details
+        details = {}
+        details['prn'] = str(self.__prn()) or None
+        details['separator'] = str(self.__separator()) or None
+        details['commit_text'] = str(self.__commit_text()) or None
+        details['author'] = str(self.__author()) or None
+        details['branch'] = str(self.__modified_branch()) or None
+        if DEBUG == "True":
+            write_debug("[debug] svn details:", str(details))
+        return details
 
     def __prn(self):
         '''Returns the PRN number from a Subversion transaction, or None'''
@@ -107,16 +105,20 @@ class Subversion(object):
             write_debug("[author]: ", tmp)
         return tmp
 
-    # Try to identify the branch based on the path in the transaction.  It's
-    # not a modified branch unless the transaction succeeds, so the name is
-    # misleading.  Fix it.
-    # Examples of matches for the branch:
+
+    # Identify the branch based on the path in the transaction.  Returns
+    # "Viper", "M.m", "Patch" or None
     #
+    # FIXME Two things: simplify the parsing, and identify exactly which
+    # strings may be returned.
+    #
+    # FIXME It's not a modified branch unless the transaction succeeds, so the
+    # name is misleading.
+    #
+    # Examples of matches for the branch:
     # - current project:    \branches\projects\Viper
     # - service packs:      \branches\M.m\maintenance\base
     # - patch branches:     \branches\M.m\maintenance\M.m.SPpn, where pn>00
-    #
-    # returns "Viper", "M.m", "Patch" or None
     def __modified_branch(self):
         '''Returns the branch for this transaction (string)'''
         # paths looks like ['A   path/to/file1.txt\r', 'M   path/to/file2.txt']
@@ -138,11 +140,13 @@ class Subversion(object):
         except IndexError:
             write_debug("What the deuce?")
             write_debug("There doesn't seem to be anything in the transaction")
+
+        # 'A   path/to/file1.txt\r' --> 'A   path', 'to', 'file1.txt\r'
         path_parts = os.path.normpath(path).split(os.sep)
         if DEBUG == "True":
-            write_debug("path_parts:", str(path_parts), "\n")
+            write_debug("path_parts:", str(path_parts))
 
-        # DEBUG ignore the SVN status bits at the front of the path
+        # ignore the SVN status bits at the front of the path
         if path_parts[0].endswith('branches'):
             if DEBUG == "True":
                 write_debug("path_parts[0] endswith branches")
@@ -155,11 +159,12 @@ class Subversion(object):
                 if path_parts[2] == "Viper":
                     branch = path_parts[2]
                     if DEBUG == "True":
-                        write_debug("path_parts[2] is Viper")
-                # TODO This should never happen.  So I should flag it as
-                # exceptional rather than just returning it as normal.
+                        write_debug("path_parts[2] is ", path_parts[2])
+                # TODO AFAIK, this should never happen.  So rather than just
+                # returning it I should flag it as an exception.
                 else:
                     return branch
+            # Wrap in try/catch?
             else:
                 major, minor = path_parts[1].split('.')
                 try:
@@ -214,7 +219,7 @@ class Subversion(object):
                 pn = SPpn[2:]  # if SPpn isn't a string, we're hosed
                 if int(pn) % 100:
                     # it's a patch branch (but we already knew that)
-                    branch = "Engineering Build"
+                    branch = "Patch"
                 else:
                     write_debug("[modbranch] should never get here")
                     sys.exit(1)
@@ -232,15 +237,15 @@ class Subversion(object):
                 stderr = subprocess.PIPE)
         stdout_text, stderr_text = p.communicate(None)
         if DEBUG == "True":
-            write_debug("[changed] stdout:", stdout_text)
-            write_debug("[changed] stderr:", stderr_text)
+            write_debug("[changed] stdout:", stdout_text.strip('\n'))
+            write_debug("[changed] stderr:", stderr_text.strip('\n'))
         return stdout_text.strip()
 
     def __log(self):
         '''Returns the entire SVN log message (private method)'''
         tmp = fs.svn_fs_txn_prop(self.txn, "svn:log")
         if DEBUG == "True":
-            write_debug("[log]: ", tmp)
+            write_debug("[log]:", tmp)
         return tmp
 
 
@@ -254,7 +259,21 @@ class NetResults(object):
             Trusted_Connection=yes''')
         self.cursor = conn.cursor()
 
-    def prn(self, prn):
+    def get_details(self, prn_from_svn):
+        '''DOCSTRING'''
+        tmp = self.__prn(prn_from_svn)
+
+        details = {}
+        details['prn'] = str(tmp.PRN) or None
+        details['title'] = str(tmp.Text1) or None
+        details['assigned_to'] = str(tmp.Assignee) or None
+        details['status'] = str(tmp.Status) or None
+        details['project'] = str(tmp.Pulldown8) or None
+        if DEBUG == "True":
+            write_debug("[driver] NetResults details:", str(details))
+        return details
+
+    def __prn(self, prn):
         '''Returns the PRN contents as a list if found, or None'''
         record = self.cursor.execute('''
             SELECT PRN, Text1, Assignee, Status, Pulldown8
@@ -262,20 +281,10 @@ class NetResults(object):
             WHERE PRN = ?
             ''', prn).fetchall()
         if len(record) <= 0:
-            # should be sys.exit('What the deuce?  PRN number not found.')
-            sys.stderr.write('What the deuce?  PRN number not found.')
-            sys.exit(1)
+            sys.exit('Error: PRN number not found.')
         elif len(record) > 1:
-            # should be sys.exit('Error: found too many PRNs (huh?)')
-            sys.stderr.write('Error: found too many PRNs (huh?)')
-            sys.exit(1)
+            sys.exit('Error: found too many PRNs (huh?)')
         else:
-            if DEBUG == "True":
-                write_debug("[bugbranch] record[0].PRN: ", str(record[0].PRN))
-                write_debug("[bugbranch] record[0].Text1: ", str(record[0].Text1))
-                write_debug("[bugbranch] record[0].Assignee: ", str(record[0].Assignee))
-                write_debug("[bugbranch] record[0].Status: ", str(record[0].Status))
-                write_debug("[bugbranch] record[0].Pulldown8: ", str(record[0].Pulldown8))
             return record[0]
 
     def name(self, name):
@@ -290,45 +299,8 @@ class NetResults(object):
             sys.exit('Error: user %s not found in %s' % (name, INI_FILE))
         except:
             if DEBUG == "True":
-                write_debug("name: ", str(name), "\n")
+                write_debug("name:", str(name), "\n")
             sys.exit('Error: something broke in NetResults::name()')
-
-    def DEBUG_prn_summary(self):
-        '''DOCSTRING'''
-        self.total=0
-        self.assigned=0
-        self.closed=0
-        self.deferred=0
-        self.reported=0
-        self.resolved=0
-        self.misc=0
-
-        for row in self.nr_prnReader:
-            self.total=self.total+1
-            if self.total==1:
-                continue    # header
-
-            if row[9]=='Assigned':
-                self.assigned=self.assigned+1
-            elif row[9]=='Closed':
-                self.closed=self.closed+1
-            elif row[9]=='Deferred':
-                self.deferred=self.deferred+1
-            elif row[9]=='Reported':
-                self.reported=self.reported+1
-            elif row[9]=='Resolved':
-                self.resolved=self.resolved+1
-            else:
-                print row[9]
-                self.misc=self.misc+1
-
-        # maybe return a dict instead (or throw this all away)
-        return '\tAssigned: %s\n\tClosed: %s\n\tDeferred: %s\n' % (
-                self.assigned, self.closed, self.deferred )
-        return '\tReported: %s\n\tResolved: %s\n\tmisc: %s' % (
-                self.reported, self.resolved, self.misc)
-
-#print 'Total bugs: %s' % (total)
 
 
 if __name__ == '__main__':
@@ -336,35 +308,32 @@ if __name__ == '__main__':
     # completed transaction (instead of the current one) for testing
     repos = sys.argv[1]
     txn = sys.argv[2]
+
+    # repos, txn come from commit hook (pre-commit.bat)
     svn = Subversion(repos, txn)
+    # prn, separator, commit_text, author, branch
+    svnd = svn.get_details()
 
-    svn_prn = svn.prn()
-    svn_separator = svn.separator()
-    svn_commit_text = svn.commit_text()
-    svn_author = svn.author()
-
-    print 'PRN: %s, separator: %s, commit text: %s' % (svn_prn, svn_separator,
-            svn_commit_text)
-    print 'SVN author: %s' % svn_author
+    nr = bugbranch.NetResults()
+    # prn, title, assigned_to, status, project
+    nrd = nr.get_details(svnd['prn'])
 
     # make up some NetResults data
-    nr = NetResults()
     nr_name = nr.name('Tim Condit')
-    nr_prn = nr.prn('21745')
-    #print nr.DEBUG_prn_summary()
+    nrd['prn'] = '21745'
 
     # do checks
-    if svn_prn == nr_prn[0]:
-        print 'Match: %s == %s' % (svn_prn, nr_prn[0])
+    if svnd['prn'] == nrd['prn']:
+        print 'Match: %s == %s' % (svnd['prn'], nrd['prn'])
     else:
-        print 'No match: %s != %s' % (svn_prn, nr_prn[0])
+        print 'No match: %s != %s' % (svnd['prn'], nrd['prn'])
 
-    if svn_author == nr_prn[4]:
-        print 'Match: %s == %s' % (svn_author, nr_prn[4])
+    if svnd['author'] == nrd['prn']:
+        print 'Match: %s == %s' % (svnd['author'], nrd['prn'])
     else:
-        print 'No match: %s != %s' % (svn_author, nr_prn[4])
+        print 'No match: %s != %s' % (svnd['author'], nrd['prn'])
 
-    if nr_prn[9] == 'Assigned':
+    if nrd['prn'] == 'Assigned':
         print 'PRN is assigned (pass)'
     else:
         print 'PRN is NOT assigned (fail)'
