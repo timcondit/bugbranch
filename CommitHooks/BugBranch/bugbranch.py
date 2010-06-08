@@ -15,7 +15,7 @@ import sys
 # "assigned-to-project" comparisons.
 
 config=ConfigParser.SafeConfigParser()
-config.read(os.path.join('F:/','Repositories','git','ETCM','CommitHooks','BugBranch','bugbranch.ini'))
+config.read(os.path.join('F:/','Repositories','ETCM','CommitHooks','BugBranch','bugbranch.ini'))
 
 SVNLOOK = os.path.normpath(config.get('runtime','svnlook'))
 DEBUG = os.path.normpath(config.get('runtime','debug'))
@@ -102,16 +102,16 @@ class NetResults(object):
         #   'Fix Date'/11, 'Reported In Version'/12, 'Assigned to Project'/13
         conn = pyodbc.connect('''
 	    DRIVER={SQL Server};
-	    SERVER=PTCRUISER;
-	    DATABASE=ETCM;
+	    SERVER=CHINOOK;
+	    DATABASE=ProblemTracker;
 	    Trusted_Connection=yes''')
         self.cursor = conn.cursor()
 
     def prn(self, prn):
         '''Returns the PRN contents as a list if found, or None'''
         record = self.cursor.execute('''
-	    SELECT PRN, Title, AssignedTo, Status
-	    FROM Issue
+	    SELECT PRN, Text1, Assignee, Status
+	    FROM NRTracker.Records
 	    WHERE PRN = ?
 	    ''', prn).fetchall()
 

@@ -9,7 +9,7 @@ import os.path
 import sys
 
 config=ConfigParser.SafeConfigParser()
-config.read(os.path.join('F:/','Repositories','git','ETCM','CommitHooks','BugBranch','bugbranch.ini'))
+config.read(os.path.join('F:/','Repositories','ETCM','CommitHooks','BugBranch','bugbranch.ini'))
 
 DEBUG = os.path.normpath(config.get('runtime','debug'))
 
@@ -37,7 +37,7 @@ def checkbug(repos, txn):
         nr_prn = nr.prn(svn_prn)
         # Get the author's full name from NetResults.  For now, at least, that
         # means fetching by index.
-        nr_name = nr.name(nr_prn.AssignedTo)
+        nr_name = nr.name(nr_prn.Assignee)
 
 	if DEBUG is True:
 	    # only print this if DEBUG
