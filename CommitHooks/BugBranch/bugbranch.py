@@ -136,10 +136,9 @@ class Subversion(object):
         path = ""
         try:
             path = paths[-1]
-        # This could happen ... when?
+        # This could happen ... when?  Should be never.
         except IndexError:
-            write_debug("What the deuce?")
-            write_debug("There doesn't seem to be anything in the transaction")
+            sys.exit("[modbranch] something broke when fetching the path")
 
         # 'A   path/to/file1.txt\r' --> 'A   path', 'to', 'file1.txt\r'
         path_parts = os.path.normpath(path).split(os.sep)
@@ -156,12 +155,14 @@ class Subversion(object):
             # should be moved into a configuration file after I understand it
             # better.
             if path_parts[1] == "projects":
+                # Source a list of active projects in bugbranch.ini.
                 if path_parts[2] == "Viper":
-                    branch = path_parts[2]
                     if DEBUG == "True":
                         write_debug("path_parts[2] is ", path_parts[2])
-                # TODO AFAIK, this should never happen.  So rather than just
-                # returning it I should flag it as an exception.
+                    return path_parts[2]
+                # TODO AFAIK, the only time this would happen is with a new
+                # project that the commit hook does not know about.  So rather
+                # than just returning it I should flag it as an exception.
                 else:
                     return branch
             # Wrap in try/catch?
@@ -191,11 +192,16 @@ class Subversion(object):
                 write_debug("[modbranch] expected branches/MAJOR.MINOR/maintenance")
                 sys.exit(1)
 
-            # FIXME If this particular base branch (or PRN branch for that
-            # matter) doesn't exist yet, this check will fail.
+            #
+            # maintenance branch (service pack)
+            #
             if path_parts[3] == "base":
                 # it's a service pack branch
                 branch = (major, minor)
+
+            #
+            # patch branch
+            #
             else:
                 if DEBUG == "True":
                     write_debug("path_parts[3]:", path_parts[3])
@@ -210,19 +216,16 @@ class Subversion(object):
                     write_debug("[modbranch] unknown exception in modified_branch")
                     write_debug("[modbranch] expected branches/MAJOR.MINOR/maintenance/M.m.SPpn")
                     sys.exit(1)
-                # This is where I'd check if it's a service pack (ends in 00)
-                # or patch branch (ends in something other than 00).  But the
-                # SPpn number starts with a leading zero, so it is treated as
-                # octal...  Fortunately, I can take advantage of the fact that
-                # our patches have to use octal digits for a similar reason.
-                #
-                pn = SPpn[2:]  # if SPpn isn't a string, we're hosed
-                if int(pn) % 100:
+
+                # We don't currently allow branch IDs to end in 00, but if we
+                # did, it would identify a release branch.  This checks that
+                # unlikely scenario.
+                patchnum = SPpn[2:]
+                if int(patchnum) % 100:
                     # it's a patch branch (but we already knew that)
                     branch = "Patch"
                 else:
-                    write_debug("[modbranch] should never get here")
-                    sys.exit(1)
+                    sys.exit("It's not a patch branch (and we're out of options)")
         else:
             sys.exit("Error: %s doesn't look like a branch path" % path_parts[0])
         if DEBUG == "True":

@@ -56,11 +56,11 @@ def checkbug(repos, txn):
     # check the project versus the branch path
     if svnd['branch'] is None:
         sys.exit("[driver] project not found - maybe it's new?")
-    elif svnd['branch'] == "Viper" and nrd['project'] == "Viper":
-        pass
+    elif svnd['branch'] == "Viper" and nrd['project'] == "10.1.0000":
+        return
     elif svnd['branch'] == "Patch" and nrd['project'] == "Engineering Build":
 #        write_debug("[driver]: Patch (Engineering Build)\n")
-        pass
+        return
     elif isinstance(svnd['branch'], tuple):
         if len(svnd['branch']) == 2:    # major, minor
             write_debug("nrd['project']:", nrd['project'])
@@ -80,13 +80,12 @@ def checkbug(repos, txn):
             # in maintenance branches, this is the only verification available
             # to us.  The PRN provides SPpn, but the branch is no help here.
             if svnd['branch'][0] == mjr and svnd['branch'][1] == mnr:
-                pass
+                return
             else:
                 # What?  Error out with details probably.
-                write_debug("[2] Something's broken in bugbranchdriver.py")
-                pass
+                sys.exit("[2] Something's broken in bugbranchdriver.py")
     else:
-        write_debug("[3] Something's broken in bugbranchdriver.py")
+        sys.exit("[3] Something's broken in bugbranchdriver.py")
 
 
 if __name__ == '__main__':
