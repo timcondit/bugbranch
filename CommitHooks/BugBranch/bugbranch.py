@@ -164,6 +164,7 @@ class Subversion(object):
                 # project that the commit hook does not know about.  So rather
                 # than just returning it I should flag it as an exception.
                 else:
+                    # FIXME branch is None here.
                     return branch
             # Wrap in try/catch?
             else:
@@ -196,8 +197,9 @@ class Subversion(object):
             # maintenance branch (service pack)
             #
             if path_parts[3] == "base":
-                # it's a service pack branch
-                branch = (major, minor)
+                if DEBUG == "True":
+                    write_debug("[bugbranch] returning (int(major), int(minor))")
+                return (int(major), int(minor))
 
             #
             # patch branch
@@ -222,7 +224,8 @@ class Subversion(object):
                 # unlikely scenario.
                 patchnum = SPpn[2:]
                 if int(patchnum) % 100:
-                    # it's a patch branch (but we already knew that)
+                    # FIXME this is a string.  All branches should be tuples,
+                    # even with a single string.
                     branch = "Patch"
                 else:
                     sys.exit("It's not a patch branch (and we're out of options)")
@@ -273,7 +276,7 @@ class NetResults(object):
         details['status'] = str(tmp.Status) or None
         details['project'] = str(tmp.Pulldown8) or None
         if DEBUG == "True":
-            write_debug("[driver] NetResults details:", str(details))
+            write_debug("[bugbranch] NetResults details:", str(details))
         return details
 
     def __prn(self, prn):
