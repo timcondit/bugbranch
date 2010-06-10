@@ -117,12 +117,21 @@ def checkbug(repos, txn):
         logger.error(msg)
         sys.exit(msg)
     # FIXME The project name should be cleaned up before we get here.
-    elif svnd['branch'] == "Viper" and nrd['project'] == "10.1.0000 (Viper)":
-        logger.info("SVN branch is 'Viper' and PT project is '10.1.0000'")
-        return
+    elif svnd['branch'] == "Viper":
+        if nrd['project'] == "10.1.0000 (Viper)":
+            logger.info("SVN branch is 'Viper' and PT project is '10.1.0000'")
+            return
+        else:
+            msg = "SVN branch is '%s' but PT project is '%s'" % (svnd['branch'], nrd['project'])
+            logger.error(msg)
+            sys.exit(msg)
     elif svnd['branch'] == "Patch" and nrd['project'] == "Engineering Build":
         logger.info("SVN branch is 'Patch' and PT project is 'Engineering Build'")
         return
+
+    # BUGBUG if branch is "Viper", but the project is not, it falls thru to
+    # here and breaks on the split(',').  Same thing is likely to happen with
+    # the patch branches.
 
     # I'd like to find a better way to do this
     else:
