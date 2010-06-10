@@ -116,18 +116,26 @@ def checkbug(repos, txn):
                 % (svnd['branch'])
         logger.error(msg)
         sys.exit(msg)
-    # FIXME The project name should be cleaned up before we get here.
+    # FIXME these two if statements are almost identical
     elif svnd['branch'] == "Viper":
+        msg = "SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
+        # FIXME The project name should be cleaned up before we get here.
         if nrd['project'] == "10.1.0000 (Viper)":
-            logger.info("SVN branch is 'Viper' and PT project is '10.1.0000'")
+            logger.info(msg)
             return
         else:
-            msg = "SVN branch is '%s' but PT project is '%s'" % (svnd['branch'], nrd['project'])
             logger.error(msg)
             sys.exit(msg)
-    elif svnd['branch'] == "Patch" and nrd['project'] == "Engineering Build":
-        logger.info("SVN branch is 'Patch' and PT project is 'Engineering Build'")
-        return
+    # FIXME This will throw a ValueError if svnd['branch'] == "Patch" but
+    # nrd['project'] != "Engineering Build"
+    elif svnd['branch'] == "Patch":
+        msg = "SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
+        if nrd['project'] == "Engineering Build":
+            logger.info(msg)
+            return
+        else:
+            logger.error(msg)
+            sys.exit(msg)
 
     # BUGBUG if branch is "Viper", but the project is not, it falls thru to
     # here and breaks on the split(',').  Same thing is likely to happen with
