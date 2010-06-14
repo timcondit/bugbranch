@@ -128,9 +128,12 @@ def checkbug(repos, txn):
             sys.exit(msg)
     # FIXME This will throw a ValueError if svnd['branch'] == "Patch" but
     # nrd['project'] != "Engineering Build"
+    #
+    # Late note: "Engineering Build" is now "Patch" in PT, so this FIXME is
+    # deprecated.  I'll remove it soon.
     elif svnd['branch'] == "Patch":
         msg = "SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
-        if nrd['project'] == "Engineering Build":
+        if nrd['project'] == "Patch":
             logger.info(msg)
             return
         else:
