@@ -46,7 +46,10 @@ class Subversion(object):
         details['separator'] = str(self.__separator()) or None
         details['commit_text'] = str(self.__commit_text()) or None
         details['author'] = str(self.__author()) or None
-        details['branch'] = str(self.__modified_branch()) or None
+        if details['prn'] != '00000' and details['author'] != 'buildmgr':
+            details['branch'] = str(self.__modified_branch()) or None
+        else:
+            details['branch'] = None
         if DEBUG == "True":
             write_debug("[debug] svn details:", str(details))
         return details
