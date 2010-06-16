@@ -98,7 +98,7 @@ class Subversion(object):
                 (?P<separator>[:-])         # match the separator character,
                                             # ':' or '-'
                 \s*                         # whitespace
-                (?P<commit_text>\w+)        # match commit message text
+                (?P<commit_text>.*$)        # match commit message text
                 ''', re.VERBOSE|re.MULTILINE)
 
     def __author(self):
