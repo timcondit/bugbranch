@@ -22,22 +22,68 @@ will allow me to build up a "layered" series of conditions, where some things
 commit.
 
 
+Mappings (from the get_details() methods of Subversion and NetResults:
+
+svn_prn         --> svnd['prn']
+svn_separator   --> svnd['separator']
+svn_commit_text --> svnd['commit_text']
+svn_author      --> svnd['author']
+svn_branch      --> svnd['branch']
+
+nr_prn          --> nrd['prn']
+nr_title        --> nrd['title']
+nr_assigned_to  --> nrd['assigned_to']
+nr_status       --> nrd['status']
+nr_project       --> nrd['project']
+nr_request_type --> nrd['request_type']
+
+
+
+Conditions:
+C01: svn_author == "buildmgr"
+C02: svn_prn == "00000"
+C03: nr_status == "Assigned"
+C04: svn_author == nr_assigned_to
+C05: svn_branch == nr_project
+C06: nr_request_type == "Branch"
+C07: svn_branch == "branches/projects/Viper"
+C08: svn_branch == "branches/9.10/maintenance/base"
+C09: svn_branch == "branches/10.0/maintenance/base"
+
+
 Rules:
+R00: Deny
 
-00: Deny.
+R01:        (AND C01 C02)
+R01 (long): Allow IF (svnd['author'] == "buildmgr") AND
+                (svnd['prn'] == "00000")
 
-# "special" case
-Rule_01: Allow IF (SVN committer is "buildmgr") AND (PRN is "00000")
+R02:        (AND C03 C04 C05)
+R02 (long): Allow IF (nrd['status'] is "Assigned") AND
+                (svnd['author'] == nrd['assigned_to']) AND
+                (svnd['branch'] == nrd['project'])
 
-# partial rule (fragment?)
-Rule_02: Allow IF (svnd['status'] is "Assigned") AND (svnd['author'] == prnd['assigned_to']) AND ...
+R03:        (AND C03 C04 C06 C07)
+R03 (long): Allow IF (nrd['status'] is "Assigned") AND
+                (svnd['author'] == nrd['assigned_to']) AND
+                (svnd['branch'] == nrd['project']) AND
+                (nrd['request_type'] == 'Branch') AND
+                (svnd['branch'] is "Viper")
 
-Rule_03: Allow IF (Rule_02) AND (svnd['branch'] == prnd['project'])
+R04:        (AND C03 C04 C06 C08)
+R04 (long): Allow IF (nrd['status'] is "Assigned") AND
+                (svnd['author'] == nrd['assigned_to']) AND
+                (svnd['branch'] == nrd['project']) AND
+                (nrd['request_type'] == 'Branch') AND
+                (svnd['branch'] is "9.10/maintenance/base")
 
-# the list of allowed branches for these three should come from PT database
-Rule_04: Allow IF (Rule_03) AND (prnd['request_type'] == 'Branch') AND (svnd['branch'] is "Viper")
-Rule_05: Allow IF (Rule_03) AND (prnd['request_type'] == 'Branch') AND (svnd['branch'] is "9.10/maintenance/base")
-Rule_06: Allow IF (Rule_03) AND (prnd['request_type'] == 'Branch') AND (svnd['branch'] is "10.0/maintenance/base")
+R05:        (AND C03 C04 C06 C09)
+R05 (long): Allow IF (nrd['status'] is "Assigned") AND
+                (svnd['author'] == nrd['assigned_to']) AND
+                (svnd['branch'] == nrd['project']) AND
+                (nrd['request_type'] == 'Branch') AND
+                (svnd['branch'] is "10.0/maintenance/base")
+
 
 
 
@@ -55,20 +101,3 @@ Rule_10: Allow IF (Rule_02) AND
 Rule_11: Allow IF (Rule_02) AND 
 Rule_12: Allow IF (Rule_02) AND 
 
-
-(svn_Branch is compatible with prn_Assigned_To_Project)
-
-
-
-What does "is compatible" mean?
-
-01: prn_Branch
-
-
-    (
-01: Deny if (PRN status is not "Assigned") OR (PRN Assigned_To is not committer).
-02: Pass if (SVN committer is "buildmgr") AND (PRN is "00000") else block.
-03: If PRN Assigned_To_Project is "Viper"
-    then SVN branch must be "Viper"
-    else block.
-04.1: 
