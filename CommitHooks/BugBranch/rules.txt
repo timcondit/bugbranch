@@ -1,0 +1,74 @@
+
+I'm thinking of switching this thing over to a rules-based system.  Here are
+the rules:
+
+Start at no. 1, and work your way down.  Apply the transaction to the current
+rule.  The commit is blocked unless some rule passes.  The first passing rule
+short circuits the system.  If no rules pass, the commit is blocked.
+
+This implies that we need a rule encoder, and some way of testing each rule
+individually.
+
+
+Late note: There are a few alternatives here:
+    - default to "allow" then block
+    - default to "deny" then allow
+    - use monolithic rules
+    - use atomic conditions and build rules from conditions
+
+Building rules from a set of conditions seems like the right approach.  That
+will allow me to build up a "layered" series of conditions, where some things
+(e.g., bug must be assigned) are necessary but not sufficient to allow a
+commit.
+
+
+Rules:
+
+00: Deny.
+
+# "special" case
+Rule_01: Allow IF (SVN committer is "buildmgr") AND (PRN is "00000")
+
+# partial rule (fragment?)
+Rule_02: Allow IF (svnd['status'] is "Assigned") AND (svnd['author'] == prnd['assigned_to']) AND ...
+
+Rule_03: Allow IF (Rule_02) AND (svnd['branch'] == prnd['project'])
+
+# the list of allowed branches for these three should come from PT database
+Rule_04: Allow IF (Rule_03) AND (prnd['request_type'] == 'Branch') AND (svnd['branch'] is "Viper")
+Rule_05: Allow IF (Rule_03) AND (prnd['request_type'] == 'Branch') AND (svnd['branch'] is "9.10/maintenance/base")
+Rule_06: Allow IF (Rule_03) AND (prnd['request_type'] == 'Branch') AND (svnd['branch'] is "10.0/maintenance/base")
+
+
+
+svnd['']
+svnd['']
+
+svn_Branch is prn_Project
+
+Rule_05: Allow IF (Rule_02) AND 
+Rule_06: Allow IF (Rule_02) AND 
+Rule_07: Allow IF (Rule_02) AND 
+Rule_08: Allow IF (Rule_02) AND 
+Rule_09: Allow IF (Rule_02) AND 
+Rule_10: Allow IF (Rule_02) AND 
+Rule_11: Allow IF (Rule_02) AND 
+Rule_12: Allow IF (Rule_02) AND 
+
+
+(svn_Branch is compatible with prn_Assigned_To_Project)
+
+
+
+What does "is compatible" mean?
+
+01: prn_Branch
+
+
+    (
+01: Deny if (PRN status is not "Assigned") OR (PRN Assigned_To is not committer).
+02: Pass if (SVN committer is "buildmgr") AND (PRN is "00000") else block.
+03: If PRN Assigned_To_Project is "Viper"
+    then SVN branch must be "Viper"
+    else block.
+04.1: 
