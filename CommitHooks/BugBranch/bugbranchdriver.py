@@ -110,6 +110,33 @@ def checkbug(repos, txn):
         logger.error(msg)
         sys.exit(msg)
 
+    # short circuit if we're using a Branch PRN to commit to a maintenance or
+    # project branch (what about patch branches?)
+    if nrd['request_type'] == "Branch":
+        write_debug("it's a Branch PRN")
+        if svnd['branch'] == "Viper":
+            write_debug("it's a Branch PRN (Viper)")
+        elif svnd['branch'] == "Patch":
+            write_debug("it's a Branch PRN (a patch branch)")
+        else:
+            try:
+                tmp1, tmp2 = svnd['branch'].split(',')
+                # DEBUG
+                logger.debug("tmp1:%s" % tmp1)
+                logger.debug("tmp2:%s" % tmp2)
+
+                # you believe this crap?
+                svn_mjr = tmp1.strip(' (')
+                svn_mnr = tmp2.strip(' )')
+                # if we get here, it's a maintenance branch and we're
+                # committing with a branch PRN
+                return
+            except:
+                write_debug("it's a Branch PRN (but I can't identify it)")
+    else:
+        write_debug("[debug] it's not a Branch PRN")
+
+
     # check the project versus the branch path
     if svnd['branch'] is None:
         msg = "SVN branch %s not found in Problem Tracker - maybe it's new?" \
@@ -138,7 +165,7 @@ def checkbug(repos, txn):
             logger.info(msg)
             return
         # allow branch PRNs to commit merges to multiple branches (2)
-        elif svnd['request_type'] == "Branch":
+        elif nrd['request_type'] == "Branch":
             msg += " // branch PRN"
             logger.info(msg)
             return
@@ -204,7 +231,7 @@ def checkbug(repos, txn):
             logger.info(msg)
             return
         # allow branch PRNs to commit merges to multiple branches (3)
-        elif svnd['request_type'] == "Branch":
+        elif nrd['request_type'] == "Branch":
             msg += " // branch PRN"
             logger.info(msg)
             return
