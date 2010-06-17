@@ -131,9 +131,15 @@ def checkbug(repos, txn):
     #
     # Late note: "Engineering Build" is now "Patch" in PT, so this FIXME is
     # deprecated.  I'll remove it soon.
+    # target2: maintenance branches
     elif svnd['branch'] == "Patch":
         msg = "SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
         if nrd['project'] == "Patch":
+            logger.info(msg)
+            return
+        # allow branch PRNs to commit merges to multiple branches (2)
+        elif svnd['request_type'] == "Branch":
+            msg += " // branch PRN"
             logger.info(msg)
             return
         else:
@@ -145,7 +151,10 @@ def checkbug(repos, txn):
     # the patch branches.
 
     # I'd like to find a better way to do this
+    #
+    # target3: maintenance or patch branches
     else:
+        logger.debug(svnd['branch'])
         # We now have a string disguised as a two-tuple; looks like "(10, 0)".
         # This is where things get ugly (or uglier).
         tmp1, tmp2 = svnd['branch'].split(',')
@@ -162,7 +171,23 @@ def checkbug(repos, txn):
 
         # Split strings like "10.0.0200 (10.0.SP2)" or "10.1.0000 (Viper)",
         # leaving junk behind.
-        pt_ver, junk = nrd['project'].split()
+        #
+        # Caution: this could be just "Patch" (from PT).
+        if nrd['project'] == "Patch":
+            # (this sucks)
+            msg = "Error: SVN branch is '%s' and PT project is '%s'" \
+                    % (svnd['branch'], nrd['project'])
+            logger.error(msg)
+            sys.exit(msg)
+        else:
+            try:
+                pt_ver, junk = nrd['project'].split()
+            except ValueError:
+                # This would happen if there's a single "word" in the project
+                # field.  We shouldn't see this, but if we do, error and exit.
+                msg = "Something broke while getting the PT version"
+                logger.error(msg)
+                sys.exit(msg)
 
         # Expect ValueErrors here if the input is not a three-part version
         # number.  This would fail on projects in "Patch" (formerly
@@ -176,6 +201,11 @@ def checkbug(repos, txn):
         if svn_mjr == pt_mjr and svn_mnr == pt_mnr:
             msg = "svn_mjr == pt_mjr and svn_mnr == pt_mnr (%s==%s, %s==%s)" \
                     % (svn_mjr, pt_mjr, svn_mnr, pt_mnr)
+            logger.info(msg)
+            return
+        # allow branch PRNs to commit merges to multiple branches (3)
+        elif svnd['request_type'] == "Branch":
+            msg += " // branch PRN"
             logger.info(msg)
             return
         else:
