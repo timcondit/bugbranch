@@ -110,6 +110,33 @@ def checkbug(repos, txn):
         logger.error(msg)
         sys.exit(msg)
 
+    # short circuit if we're using a Branch PRN to commit to a maintenance or
+    # project branch (what about patch branches?)
+    if nrd['request_type'] == "Branch":
+        write_debug("it's a Branch PRN")
+        if svnd['branch'] == "Viper":
+            write_debug("it's a Branch PRN (Viper)")
+        elif svnd['branch'] == "Patch":
+            write_debug("it's a Branch PRN (a patch branch)")
+        else:
+            try:
+                tmp1, tmp2 = svnd['branch'].split(',')
+                # DEBUG
+                logger.debug("tmp1:%s" % tmp1)
+                logger.debug("tmp2:%s" % tmp2)
+
+                # you believe this crap?
+                svn_mjr = tmp1.strip(' (')
+                svn_mnr = tmp2.strip(' )')
+                # if we get here, it's a maintenance branch and we're
+                # committing with a branch PRN
+                return
+            except:
+                write_debug("it's a Branch PRN (but I can't identify it)")
+    else:
+        write_debug("[debug] it's not a Branch PRN")
+
+
     # check the project versus the branch path
     if svnd['branch'] is None:
         msg = "SVN branch %s not found in Problem Tracker - maybe it's new?" \
@@ -131,9 +158,15 @@ def checkbug(repos, txn):
     #
     # Late note: "Engineering Build" is now "Patch" in PT, so this FIXME is
     # deprecated.  I'll remove it soon.
+    # target2: maintenance branches
     elif svnd['branch'] == "Patch":
         msg = "SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
         if nrd['project'] == "Patch":
+            logger.info(msg)
+            return
+        # allow branch PRNs to commit merges to multiple branches (2)
+        elif nrd['request_type'] == "Branch":
+            msg += " // branch PRN"
             logger.info(msg)
             return
         else:
@@ -145,7 +178,10 @@ def checkbug(repos, txn):
     # the patch branches.
 
     # I'd like to find a better way to do this
+    #
+    # target3: maintenance or patch branches
     else:
+        logger.debug(svnd['branch'])
         # We now have a string disguised as a two-tuple; looks like "(10, 0)".
         # This is where things get ugly (or uglier).
         tmp1, tmp2 = svnd['branch'].split(',')
@@ -162,7 +198,23 @@ def checkbug(repos, txn):
 
         # Split strings like "10.0.0200 (10.0.SP2)" or "10.1.0000 (Viper)",
         # leaving junk behind.
-        pt_ver, junk = nrd['project'].split()
+        #
+        # Caution: this could be just "Patch" (from PT).
+        if nrd['project'] == "Patch":
+            # (this sucks)
+            msg = "Error: SVN branch is '%s' and PT project is '%s'" \
+                    % (svnd['branch'], nrd['project'])
+            logger.error(msg)
+            sys.exit(msg)
+        else:
+            try:
+                pt_ver, junk = nrd['project'].split()
+            except ValueError:
+                # This would happen if there's a single "word" in the project
+                # field.  We shouldn't see this, but if we do, error and exit.
+                msg = "Something broke while getting the PT version"
+                logger.error(msg)
+                sys.exit(msg)
 
         # Expect ValueErrors here if the input is not a three-part version
         # number.  This would fail on projects in "Patch" (formerly
@@ -176,6 +228,11 @@ def checkbug(repos, txn):
         if svn_mjr == pt_mjr and svn_mnr == pt_mnr:
             msg = "svn_mjr == pt_mjr and svn_mnr == pt_mnr (%s==%s, %s==%s)" \
                     % (svn_mjr, pt_mjr, svn_mnr, pt_mnr)
+            logger.info(msg)
+            return
+        # allow branch PRNs to commit merges to multiple branches (3)
+        elif nrd['request_type'] == "Branch":
+            msg += " // branch PRN"
             logger.info(msg)
             return
         else:

@@ -98,7 +98,7 @@ class Subversion(object):
                 (?P<separator>[:-])         # match the separator character,
                                             # ':' or '-'
                 \s*                         # whitespace
-                (?P<commit_text>\w+)        # match commit message text
+                (?P<commit_text>.*$)        # match commit message text
                 ''', re.VERBOSE|re.MULTILINE)
 
     def __author(self):
@@ -278,6 +278,7 @@ class NetResults(object):
         details['assigned_to'] = str(tmp.Assignee) or None
         details['status'] = str(tmp.Status) or None
         details['project'] = str(tmp.Pulldown8) or None
+        details['request_type'] = str(tmp.Pulldown2) or None
         if DEBUG == "True":
             write_debug("[bugbranch] NetResults details:", str(details))
         return details
@@ -285,7 +286,7 @@ class NetResults(object):
     def __prn(self, prn):
         '''Returns the PRN contents as a list if found, or None'''
         record = self.cursor.execute('''
-            SELECT PRN, Text1, Assignee, Status, Pulldown8
+            SELECT PRN, Text1, Assignee, Status, Pulldown8, Pulldown2
             FROM NRTracker.Records
             WHERE PRN = ?
             ''', prn).fetchall()

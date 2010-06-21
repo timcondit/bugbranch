@@ -1,0 +1,103 @@
+
+I'm thinking of switching this thing over to a rules-based system.  Here are
+the rules:
+
+Start at no. 1, and work your way down.  Apply the transaction to the current
+rule.  The commit is blocked unless some rule passes.  The first passing rule
+short circuits the system.  If no rules pass, the commit is blocked.
+
+This implies that we need a rule encoder, and some way of testing each rule
+individually.
+
+
+Late note: There are a few alternatives here:
+    - default to "allow" then block
+    - default to "deny" then allow
+    - use monolithic rules
+    - use atomic conditions and build rules from conditions
+
+Building rules from a set of conditions seems like the right approach.  That
+will allow me to build up a "layered" series of conditions, where some things
+(e.g., bug must be assigned) are necessary but not sufficient to allow a
+commit.
+
+
+Mappings (from the get_details() methods of Subversion and NetResults:
+
+svn_prn         --> svnd['prn']
+svn_separator   --> svnd['separator']
+svn_commit_text --> svnd['commit_text']
+svn_author      --> svnd['author']
+svn_branch      --> svnd['branch']
+
+nr_prn          --> nrd['prn']
+nr_title        --> nrd['title']
+nr_assigned_to  --> nrd['assigned_to']
+nr_status       --> nrd['status']
+nr_project       --> nrd['project']
+nr_request_type --> nrd['request_type']
+
+
+
+Conditions:
+C01: svn_author == "buildmgr"
+C02: svn_prn == "00000"
+C03: nr_status == "Assigned"
+C04: svn_author == nr_assigned_to
+C05: svn_branch == nr_project
+C06: nr_request_type == "Branch"
+C07: svn_branch == "branches/projects/Viper"
+C08: svn_branch == "branches/9.10/maintenance/base"
+C09: svn_branch == "branches/10.0/maintenance/base"
+
+
+Rules:
+R00: Deny
+
+R01:        (AND C01 C02)
+R01 (long): Allow IF (svnd['author'] == "buildmgr") AND
+                (svnd['prn'] == "00000")
+
+R02:        (AND C03 C04 C05)
+R02 (long): Allow IF (nrd['status'] is "Assigned") AND
+                (svnd['author'] == nrd['assigned_to']) AND
+                (svnd['branch'] == nrd['project'])
+
+R03:        (AND C03 C04 C06 C07)
+R03 (long): Allow IF (nrd['status'] is "Assigned") AND
+                (svnd['author'] == nrd['assigned_to']) AND
+                (svnd['branch'] == nrd['project']) AND
+                (nrd['request_type'] == 'Branch') AND
+                (svnd['branch'] is "Viper")
+
+R04:        (AND C03 C04 C06 C08)
+R04 (long): Allow IF (nrd['status'] is "Assigned") AND
+                (svnd['author'] == nrd['assigned_to']) AND
+                (svnd['branch'] == nrd['project']) AND
+                (nrd['request_type'] == 'Branch') AND
+                (svnd['branch'] is "9.10/maintenance/base")
+
+R05:        (AND C03 C04 C06 C09)
+R05 (long): Allow IF (nrd['status'] is "Assigned") AND
+                (svnd['author'] == nrd['assigned_to']) AND
+                (svnd['branch'] == nrd['project']) AND
+                (nrd['request_type'] == 'Branch') AND
+                (svnd['branch'] is "10.0/maintenance/base")
+
+
+
+
+svnd['']
+svnd['']
+
+svn_Branch is prn_Project
+
+Rule_05: Allow IF (Rule_02) AND 
+Rule_06: Allow IF (Rule_02) AND 
+Rule_07: Allow IF (Rule_02) AND 
+Rule_08: Allow IF (Rule_02) AND 
+Rule_09: Allow IF (Rule_02) AND 
+Rule_10: Allow IF (Rule_02) AND 
+Rule_11: Allow IF (Rule_02) AND 
+Rule_12: Allow IF (Rule_02) AND 
+
