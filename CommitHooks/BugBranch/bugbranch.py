@@ -46,10 +46,10 @@ class Subversion(object):
         details['separator'] = str(self.__separator()) or None
         details['commit_text'] = str(self.__commit_text()) or None
         details['author'] = str(self.__author()) or None
-        if details['prn'] != '00000' and details['author'] != 'buildmgr':
-            details['branch'] = str(self.__modified_branch()) or None
-        else:
+        if details['prn'] == '00000' and details['author'] == 'buildmgr':
             details['branch'] = None
+        else:
+            details['branch'] = str(self.__modified_branch()) or None
         if DEBUG == "True":
             write_debug("[debug] svn details:", str(details))
         return details
@@ -169,6 +169,8 @@ class Subversion(object):
                 else:
                     # FIXME branch is None here.
                     return branch
+            elif path_parts[1] == "developers":
+                return path_parts[1]
             # Wrap in try/catch?
             else:
                 major, minor = path_parts[1].split('.')

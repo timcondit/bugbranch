@@ -77,6 +77,10 @@ def checkbug(repos, txn):
         logger.info("svnd['prn'] == '00000' and svnd['author'] == 'buildmgr'")
         return
 
+    if svnd['branch'] == 'developers':
+        logger.info("svnd['branch'] == %s" % svnd['branch'])
+        return
+
     nr = bugbranch.NetResults()
     # prn, title, assigned_to, status, project
     nrd = nr.get_details(svnd['prn'])
