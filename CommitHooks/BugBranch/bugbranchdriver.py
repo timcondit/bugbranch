@@ -70,6 +70,37 @@ def checkbug(repos, txn):
         svnd_p += ("\n  %s=%s" % (key, value))
     logger.debug(svnd_p)
 
+    # block commits to obsolete SVN branches.  If I redo this thing, I'll tidy
+    # up these string tuples (iow, (x, y) -> x.y).
+    #
+    # '9.12', '9.10', '9.9', '9.8', '9.7', '9.6', '9.4', '9.2', '9.1'
+    obsolete_branches = [ '(9, 12)', '(9, 10)', '(9, 9)', '(9, 8)', '(9, 7)',
+            '(9, 6)', '(9, 4)', '(9, 2)', '(9, 1)', ]
+
+    if svnd['branch'] in obsolete_branches:
+
+        # PRN22511: temporary hack while Olga works on a Free & Clear case in 9.10/m.
+        if svnd['author'] == 'olgam':
+            msg = "0095: branch %s is obsolete (for all but %s)" % (svnd['branch'], svnd['author'])
+            logger.info(msg)
+            return
+
+        msg = "0100: Commit failed: branch %s is obsolete" % svnd['branch']
+        logger.error(msg)
+        sys.exit(msg)
+#    else:
+#        msg = "0100: Commit should have failed: branch %s is obsolete" % svnd['branch']
+#        logger.info(msg)
+#        sys.exit(msg)
+
+    ignored_branches = [ '(9, 0)', '(8, 4)' ]
+    if svnd['branch'] in ignored_branches:
+        logger.info("svnd['branch'] == %s (IGNORED)" % svnd['branch'])
+        return
+    else:
+        logger.info("svnd['branch'] == %s (NOT IGNORED (why the eff not?))" % svnd['branch'])
+
+
     # This is not enough to ensure that only automated commits happen with the
     # buildmgr account.  I can still login as buildmgr as usual and use 00000.
     if svnd['prn'] == '00000' and svnd['author'] == 'buildmgr':
@@ -91,26 +122,29 @@ def checkbug(repos, txn):
         nrd_p += ("\n  %s=%s" % (key, value))
     logger.debug(nrd_p)
 
-    authors = ['anthonyb','chrisc','dans','hoangn','jons','timc']
+    # add michaelw
+    #authors = ['anthonyb','chrisc','dans','hoangn','jons','kenm','michaelw','olgam','timc']
+    # temp remove kenm for AlcatelCert
+    authors = ['anthonyb','chrisc','dans','hoangn','jons','michaelw','olgam','timc']
     if svnd['author'] not in authors:
         logger.warning("Test users: %s" % authors)
         return
 
     # do checks
     if nrd['status'] != 'Assigned':
-        msg = "Commit failed: PRN%s is not Assigned (it's %s)" % (svnd['prn'], nrd['status'])
+        msg = "0110: Commit failed: PRN%s is not Assigned (it's %s)" % (svnd['prn'], nrd['status'])
         logger.error(msg)
         sys.exit(msg)
 
     # This is unlikely to happen.
     if svnd['prn'] != nrd['prn']:
-        msg = "Commit failed: invalid PRN number (%s != %s)" % (svnd['prn'], nrd['prn'])
+        msg = "0120: Commit failed: invalid PRN number (%s != %s)" % (svnd['prn'], nrd['prn'])
         logger.error(msg)
         sys.exit(msg)
 
     # convert SVN name to PT name, then compare
     if svnd['author'] != nr.name(nrd['assigned_to']):
-        msg = "PRN is assigned to %s, not %s" % (nr.name(nrd['assigned_to']), svnd['author'])
+        msg = "0130: PRN is assigned to %s, not %s" % (nr.name(nrd['assigned_to']), svnd['author'])
         logger.error(msg)
         sys.exit(msg)
 
@@ -137,21 +171,28 @@ def checkbug(repos, txn):
                 return
             except:
                 write_debug("it's a Branch PRN (but I can't identify it)")
+    elif nrd['request_type'] == "Feature Work PRN":
+        write_debug("it's a Feature Work PRN")
+        if svnd['branch'] == "ADLogin":
+            write_debug("it's a Branch PRN (ADLogin)")
+        return
     else:
         write_debug("[debug] it's not a Branch PRN")
 
-
     # check the project versus the branch path
     if svnd['branch'] is None:
-        msg = "SVN branch %s not found in Problem Tracker - maybe it's new?" \
+        msg = "0140: SVN branch %s not found in Problem Tracker - maybe it's new?" \
                 % (svnd['branch'])
         logger.error(msg)
         sys.exit(msg)
     # FIXME these two if statements are almost identical
     elif svnd['branch'] == "Viper":
-        msg = "SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
+        msg = "0150: SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
         # FIXME The project name should be cleaned up before we get here.
         if nrd['project'] == "10.1.0000 (Viper)":
+            logger.info(msg)
+            return
+        elif nrd['project'] == "Patch":
             logger.info(msg)
             return
         else:
@@ -164,7 +205,7 @@ def checkbug(repos, txn):
     # deprecated.  I'll remove it soon.
     # target2: maintenance branches
     elif svnd['branch'] == "Patch":
-        msg = "SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
+        msg = "0160: SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
         if nrd['project'] == "Patch":
             logger.info(msg)
             return
@@ -206,17 +247,20 @@ def checkbug(repos, txn):
         # Caution: this could be just "Patch" (from PT).
         if nrd['project'] == "Patch":
             # (this sucks)
-            msg = "Error: SVN branch is '%s' and PT project is '%s'" \
+            msg = "0170: Error: SVN branch is '%s' and PT project is '%s'" \
                     % (svnd['branch'], nrd['project'])
-            logger.error(msg)
-            sys.exit(msg)
+#            logger.error(msg)
+#            sys.exit(msg)
+            # ugly - PRN22308
+            logger.info(msg)
+            return
         else:
             try:
                 pt_ver, junk = nrd['project'].split()
             except ValueError:
                 # This would happen if there's a single "word" in the project
                 # field.  We shouldn't see this, but if we do, error and exit.
-                msg = "Something broke while getting the PT version"
+                msg = "0180: Something broke while getting the PT version"
                 logger.error(msg)
                 sys.exit(msg)
 
@@ -249,13 +293,13 @@ def checkbug(repos, txn):
             msg += "  PT project MAJOR.MINOR:%s.%s" % (pt_mjr, pt_mnr)
             write_debug(msg)
 
-            logmsg = "%s.%s != %s.%s (SVN branch != PT project)\n" \
+            logmsg = "0190: %s.%s != %s.%s (SVN branch != PT project)\n" \
                     % (svn_mjr, svn_mnr, pt_mjr, pt_mnr)
             logger.error(logmsg)
             sys.exit(1)
 
     # ERROR that should probably be EXCEPTION
-    msg = "Unknown condition (contact the maintainer)"
+    msg = "0200: Unknown condition (contact the maintainer)"
     logger.error(msg)
     logger.error(".. ", svnd_p)
     logger.error(".. ", nrd_p)

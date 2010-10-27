@@ -179,10 +179,12 @@ class Subversion(object):
                     int(minor)
                     if DEBUG == "True":
                         write_debug("path_parts[1] is %s.%s" % (major, minor))
+                    return (int(major), int(minor))
                 except:
                     write_debug("[modbranch] unknown exception")
                     write_debug("[modbranch] expected branches/MAJOR.MINOR")
-                    sys.exit(1)
+#                    sys.exit(1)
+                    return
 
             # If we get here, it's either a service pack or patch branch.
             # There's a small chance that someone will try to check into one
@@ -194,9 +196,10 @@ class Subversion(object):
             # maintenance branch, and it's not profitable to try and tease
             # them apart.
             if path_parts[2] != "maintenance":
-                write_debug("[modbranch] unknown exception")
-                write_debug("[modbranch] expected branches/MAJOR.MINOR/maintenance")
-                sys.exit(1)
+#                write_debug("[modbranch] unknown exception")
+#                write_debug("[modbranch] expected branches/MAJOR.MINOR/maintenance")
+#                sys.exit(1)
+                return
 
             #
             # maintenance branch (service pack)
