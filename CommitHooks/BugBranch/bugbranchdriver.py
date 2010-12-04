@@ -79,11 +79,11 @@ def checkbug(repos, txn):
 
     if svnd['branch'] in obsolete_branches:
 
-        # PRN22511: temporary hack while Olga works on a Free & Clear case in 9.10/m.
-        if svnd['author'] == 'olgam':
-            msg = "0095: branch %s is obsolete (for all but %s)" % (svnd['branch'], svnd['author'])
-            logger.info(msg)
-            return
+#        # PRN22511: temporary hack while Olga works on a Free & Clear case in 9.10/m.
+#        if svnd['author'] == 'olgam':
+#            msg = "0095: branch %s is obsolete (for all but %s)" % (svnd['branch'], svnd['author'])
+#            logger.info(msg)
+#            return
 
         msg = "0100: Commit failed: branch %s is obsolete" % svnd['branch']
         logger.error(msg)
@@ -122,10 +122,7 @@ def checkbug(repos, txn):
         nrd_p += ("\n  %s=%s" % (key, value))
     logger.debug(nrd_p)
 
-    # add michaelw
-    #authors = ['anthonyb','chrisc','dans','hoangn','jons','kenm','michaelw','olgam','timc']
-    # temp remove kenm for AlcatelCert
-    authors = ['anthonyb','chrisc','dans','hoangn','jons','michaelw','olgam','timc']
+    authors = ['anthonyb','chrisc','dans','hoangn','jons','kenm','michaelw','olgam','timc']
     if svnd['author'] not in authors:
         logger.warning("Test users: %s" % authors)
         return
@@ -188,6 +185,18 @@ def checkbug(repos, txn):
     # FIXME these two if statements are almost identical
     elif svnd['branch'] == "Viper":
         msg = "0150: SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
+        # FIXME The project name should be cleaned up before we get here.
+        if nrd['project'] == "10.1.0000 (Viper)":
+            logger.info(msg)
+            return
+        elif nrd['project'] == "Patch":
+            logger.info(msg)
+            return
+        else:
+            logger.error(msg)
+            sys.exit(msg)
+    elif svnd['branch'] == "JTAPI":
+        msg = "0151: SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
         # FIXME The project name should be cleaned up before we get here.
         if nrd['project'] == "10.1.0000 (Viper)":
             logger.info(msg)

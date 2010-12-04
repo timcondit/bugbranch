@@ -1,3 +1,6 @@
+import sys
+import subprocess
+import time
 
 perl = r'"C:\strawberry\perl\bin\perl.exe"'
 svnnotify_path = r'"C:\strawberry\perl\bin\svnnotify"'
@@ -50,11 +53,7 @@ files_not_uninstalled = [
 		'/src/winservices/WMWrapperService/Service/App.config',
 		]
 
-import sys
-import subprocess
-
 def emailrevision(repo, rev):
-
 	# Call to SVN::Notify
 	# max-diff-length is (1024*512) = 524288 = 512k
 	mailError =  subprocess.call(perl + ' '
@@ -89,7 +88,7 @@ def email_files_not_uninstalled(repo, rev):
 			filesOfInterest.append(filepath)
 
 	if len(filesOfInterest) > 0:
-		# Build a string of the files 
+		# Build a string of the files
 		filesOfInterestStr = '..........' + '..........'.join(filesOfInterest)
 
 		# Call to SVN::Notify with custom subject and header
@@ -116,4 +115,6 @@ if __name__ == '__main__':
 	repo = sys.argv[1]
 	rev = sys.argv[2]
 	emailrevision(repo, rev)
+        # Pause for the cause.  Otherwise we'll have problems.
+#        time.sleep(300)
 #	email_files_not_uninstalled(repo, rev)
