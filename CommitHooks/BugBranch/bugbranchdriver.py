@@ -10,7 +10,7 @@ import logging.handlers
 import os.path
 import sys
 
-BBROOT = os.path.join('F:/','Repositories','ETCM.next','CommitHooks','BugBranch')
+BBROOT = r'F:/Repositories/ETCM.next/CommitHooks/BugBranch'
 INI_FILE = os.path.join(BBROOT, 'bugbranch.ini')
 LOG_FILE = os.path.join(BBROOT, 'bugbranch.log')
 
@@ -70,46 +70,11 @@ def checkbug(repos, txn):
         svnd_p += ("\n  %s=%s" % (key, value))
     logger.debug(svnd_p)
 
-    # block commits to obsolete SVN branches.  If I redo this thing, I'll tidy
-    # up these string tuples (iow, (x, y) -> x.y).
-    #
-    # '9.12', '9.10', '9.9', '9.8', '9.7', '9.6', '9.4', '9.2', '9.1'
-    obsolete_branches = [ '(9, 12)', '(9, 10)', '(9, 9)', '(9, 8)', '(9, 7)',
-            '(9, 6)', '(9, 4)', '(9, 2)', '(9, 1)', ]
-
-    if svnd['branch'] in obsolete_branches:
-
-#        # PRN22511: temporary hack while Olga works on a Free & Clear case in 9.10/m.
-#        if svnd['author'] == 'olgam':
-#            msg = "0095: branch %s is obsolete (for all but %s)" % (svnd['branch'], svnd['author'])
-#            logger.info(msg)
-#            return
-
-        msg = "0100: Commit failed: branch %s is obsolete" % svnd['branch']
-        logger.error(msg)
-        sys.exit(msg)
-#    else:
-#        msg = "0100: Commit should have failed: branch %s is obsolete" % svnd['branch']
-#        logger.info(msg)
-#        sys.exit(msg)
-
-    ignored_branches = [ '(9, 0)', '(8, 4)' ]
-    if svnd['branch'] in ignored_branches:
-        logger.info("svnd['branch'] == %s (IGNORED)" % svnd['branch'])
-        return
-    else:
-        logger.info("svnd['branch'] == %s (NOT IGNORED (why the eff not?))" % svnd['branch'])
-
-
     # This is not enough to ensure that only automated commits happen with the
     # buildmgr account.  I can still login as buildmgr as usual and use 00000.
     if svnd['prn'] == '00000' and svnd['author'] == 'buildmgr':
         # INFO
         logger.info("svnd['prn'] == '00000' and svnd['author'] == 'buildmgr'")
-        return
-
-    if svnd['branch'] == 'developers':
-        logger.info("svnd['branch'] == %s" % svnd['branch'])
         return
 
     nr = bugbranch.NetResults()
@@ -122,12 +87,12 @@ def checkbug(repos, txn):
         nrd_p += ("\n  %s=%s" % (key, value))
     logger.debug(nrd_p)
 
-    authors = ['anthonyb','chrisc','dans','hoangn','jons','kenm','michaelw','olgam','timc']
-    if svnd['author'] not in authors:
-        logger.warning("Test users: %s" % authors)
-        return
-
     # do checks
+    if svnd['branch'] is None:
+        msg = "0100: Commit failed: branch not found in active list"
+        logger.error(msg)
+        sys.exit(msg)
+
     if nrd['status'] != 'Assigned':
         msg = "0110: Commit failed: PRN%s is not Assigned (it's %s)" % (svnd['prn'], nrd['status'])
         logger.error(msg)
@@ -144,6 +109,24 @@ def checkbug(repos, txn):
         msg = "0130: PRN is assigned to %s, not %s" % (nr.name(nrd['assigned_to']), svnd['author'])
         logger.error(msg)
         sys.exit(msg)
+
+    #
+    # the stupid sh** starts right here
+    #
+    # 1: [request type]
+    #       branch:                 for branch maintenance
+    #       all others:             don't care
+    #
+    # 2: [assigned to project]
+    #       '10.1.0000 (Viper)':    'Viper'
+    #       '10.2.0000 (Charlie)':  'Charlie'
+    #       '10.0.0200 (10.0SP2)':  'branches\10.0\maintenance\base'
+    #       "Patch": [
+    #                               'branches\10.0\maintenance\base' (DUP)
+    #                               'branches\10.0\maintenance\10.0.0115',
+    #                               'branches\10.0\maintenance\10.0.0208',
+    #                               'branches\10.0\maintenance\10.0.0214'
+    #                ]
 
     # short circuit if we're using a Branch PRN to commit to a maintenance or
     # project branch (what about patch branches?)
