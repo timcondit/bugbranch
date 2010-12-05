@@ -136,113 +136,116 @@ class Subversion(object):
         # A         F:\Source\sandbox\branches\9.10
         # A         F:\Source\sandbox\branches\9.10\maintenance
         # A         F:\Source\sandbox\branches\9.10\maintenance\base
-        path = ""
+        last_line = ""
         try:
-            path = paths[-1]
+            last_line = paths[-1]
         # This could happen ... when?  Should be never.
         except IndexError:
-            sys.exit("[modbranch] something broke when fetching the path")
+            sys.exit("[modbranch] something broke when fetching the last line")
 
         # 'A   path/to/file1.txt\r' --> 'A   path', 'to', 'file1.txt\r'
-        path_parts = os.path.normpath(path).split(os.sep)
-        if DEBUG == "True":
-            write_debug("path_parts:", str(path_parts))
+        parts = os.path.normpath(last_line).split(" ")
+        return parts[1] # parts[0] is the status (A, M, D, etc.)
 
-        # ignore the SVN status bits at the front of the path
-        if path_parts[0].endswith('branches'):
-            if DEBUG == "True":
-                write_debug("path_parts[0] endswith branches")
-            # continue chewing up the path, left to right
-            #
-            # Broadly, there are two choices here: projects, or M.m.  This
-            # should be moved into a configuration file after I understand it
-            # better.
-            if path_parts[1] == "projects":
-                # Source a list of active projects in bugbranch.ini.
-                if path_parts[2] == "Viper":
-                    if DEBUG == "True":
-                        write_debug("path_parts[2] is ", path_parts[2])
-                    return path_parts[2]
-                # TODO AFAIK, the only time this would happen is with a new
-                # project that the commit hook does not know about.  So rather
-                # than just returning it I should flag it as an exception.
-                else:
-                    # FIXME branch is None here.
-                    return branch
-            elif path_parts[1] == "developers":
-                return path_parts[1]
-            # Wrap in try/catch?
-            else:
-                major, minor = path_parts[1].split('.')
-                try:
-                    int(major)
-                    int(minor)
-                    if DEBUG == "True":
-                        write_debug("path_parts[1] is %s.%s" % (major, minor))
-                    return (int(major), int(minor))
-                except:
-                    write_debug("[modbranch] unknown exception")
-                    write_debug("[modbranch] expected branches/MAJOR.MINOR")
+#        if DEBUG == "True":
+#            write_debug("path_parts:", str(path_parts))
+#
+#        # ignore the SVN status bits at the front of the path
+#        if path_parts[0].endswith('branches'):
+#            if DEBUG == "True":
+#                write_debug("path_parts[0] endswith branches")
+#            # continue chewing up the path, left to right
+#            #
+#            # Broadly, there are two choices here: projects, or M.m.  This
+#            # should be moved into a configuration file after I understand it
+#            # better.
+#            if path_parts[1] == "projects":
+#                # Source a list of active projects in bugbranch.ini.
+#                if path_parts[2] == "Viper":
+#                    if DEBUG == "True":
+#                        write_debug("path_parts[2] is ", path_parts[2])
+#                    return path_parts[2]
+#                # TODO AFAIK, the only time this would happen is with a new
+#                # project that the commit hook does not know about.  So rather
+#                # than just returning it I should flag it as an exception.
+#                else:
+#                    # FIXME branch is None here.
+#                    return branch
+#            elif path_parts[1] == "developers":
+#                return path_parts[1]
+#            # Wrap in try/catch?
+#            else:
+#                major, minor = path_parts[1].split('.')
+#                try:
+#                    int(major)
+#                    int(minor)
+#                    if DEBUG == "True":
+#                        write_debug("path_parts[1] is %s.%s" % (major, minor))
+#                    return (int(major), int(minor))
+#                except:
+#                    write_debug("[modbranch] unknown exception")
+#                    write_debug("[modbranch] expected branches/MAJOR.MINOR")
+##                    sys.exit(1)
+#                    return
+#
+#            # If we get here, it's either a service pack or patch branch.
+#            # There's a small chance that someone will try to check into one
+#            # of the old "MAJOR.MINOR/Initial/base" branches, but that's an
+#            # error and I'm not going to check for it.
+#            #
+#            # There's no easy way to distinguish between service packs, for
+#            # example 10.0.0100 and 10.0.0200.  They both go into the
+#            # maintenance branch, and it's not profitable to try and tease
+#            # them apart.
+#            if path_parts[2] != "maintenance":
+##                write_debug("[modbranch] unknown exception")
+##                write_debug("[modbranch] expected branches/MAJOR.MINOR/maintenance")
+##                sys.exit(1)
+#                return
+#
+#            #
+#            # maintenance branch (service pack)
+#            #
+#            if path_parts[3] == "base":
+#                if DEBUG == "True":
+#                    write_debug("[bugbranch] returning (int(major), int(minor))")
+#                return (int(major), int(minor))
+#
+#            #
+#            # patch branch
+#            #
+#            else:
+#                if DEBUG == "True":
+#                    write_debug("path_parts[3]:", path_parts[3])
+#                try:
+#                    # Should this be outside the try block?  It's potentially
+#                    # unreachable otherwise.
+#                    mjr, mnr, SPpn = path_parts[3].split('.')
+#                    int(mjr)
+#                    int(mnr)
+#                    int(SPpn)
+#                except:
+#                    write_debug("[modbranch] unknown exception in modified_branch")
+#                    write_debug("[modbranch] expected branches/MAJOR.MINOR/maintenance/M.m.SPpn")
 #                    sys.exit(1)
-                    return
+#
+#                # We don't currently allow branch IDs to end in 00, but if we
+#                # did, it would identify a release branch.  This checks that
+#                # unlikely scenario.
+#                patchnum = SPpn[2:]
+#                if int(patchnum) % 100:
+#                    # FIXME this is a string.  All branches should be tuples,
+#                    # even with a single string.
+#                    branch = "Patch"
+#                else:
+#                    sys.exit("It's not a patch branch (and we're out of options)")
+#        else:
+#            sys.exit("Error: %s doesn't look like a branch path" % path_parts[0])
+#        if DEBUG == "True":
+#            write_debug("branch: %s" % str(branch))
+#        return branch
 
-            # If we get here, it's either a service pack or patch branch.
-            # There's a small chance that someone will try to check into one
-            # of the old "MAJOR.MINOR/Initial/base" branches, but that's an
-            # error and I'm not going to check for it.
-            #
-            # There's no easy way to distinguish between service packs, for
-            # example 10.0.0100 and 10.0.0200.  They both go into the
-            # maintenance branch, and it's not profitable to try and tease
-            # them apart.
-            if path_parts[2] != "maintenance":
-#                write_debug("[modbranch] unknown exception")
-#                write_debug("[modbranch] expected branches/MAJOR.MINOR/maintenance")
-#                sys.exit(1)
-                return
-
-            #
-            # maintenance branch (service pack)
-            #
-            if path_parts[3] == "base":
-                if DEBUG == "True":
-                    write_debug("[bugbranch] returning (int(major), int(minor))")
-                return (int(major), int(minor))
-
-            #
-            # patch branch
-            #
-            else:
-                if DEBUG == "True":
-                    write_debug("path_parts[3]:", path_parts[3])
-                try:
-                    # Should this be outside the try block?  It's potentially
-                    # unreachable otherwise.
-                    mjr, mnr, SPpn = path_parts[3].split('.')
-                    int(mjr)
-                    int(mnr)
-                    int(SPpn)
-                except:
-                    write_debug("[modbranch] unknown exception in modified_branch")
-                    write_debug("[modbranch] expected branches/MAJOR.MINOR/maintenance/M.m.SPpn")
-                    sys.exit(1)
-
-                # We don't currently allow branch IDs to end in 00, but if we
-                # did, it would identify a release branch.  This checks that
-                # unlikely scenario.
-                patchnum = SPpn[2:]
-                if int(patchnum) % 100:
-                    # FIXME this is a string.  All branches should be tuples,
-                    # even with a single string.
-                    branch = "Patch"
-                else:
-                    sys.exit("It's not a patch branch (and we're out of options)")
-        else:
-            sys.exit("Error: %s doesn't look like a branch path" % path_parts[0])
-        if DEBUG == "True":
-            write_debug("branch: %s" % str(branch))
-        return branch
-
+    # Actually, it returns a string that looks like a list
     def __changed(self):
         '''Returns the list of files changed in this transaction'''
         p = subprocess.Popen([SVNLOOK, 'changed', self.rpath, '-t', self.tname],
