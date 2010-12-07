@@ -45,19 +45,10 @@ mailhandler.setFormatter(formatter)
 logger.addHandler(mailhandler)
 
 
-# Accept multiple arguments, print them all on one line.
-#def write_debug(*args):
-#    for arg in args:
-#        sys.stderr.write(arg),
-#    sys.stderr.write("\n")
-
 def checkbug(repos, txn):
     '''DOCSTRING'''
 
     logger.debug("----")
-
-#    write_debug("sys.argv[1]:%s" % sys.argv[1])
-#    write_debug("sys.argv[2]:%s" % sys.argv[2])
 
     # repos, txn come from commit hook (pre-commit.bat)
     svn = bugbranch.Subversion(repos, txn)
@@ -83,7 +74,6 @@ def checkbug(repos, txn):
     # do checks
     #
     if svnd['prn'] == '00000' and svnd['author'] == 'buildmgr':
-        # INFO
         logger.info("svnd['prn'] == '00000' and svnd['author'] == 'buildmgr'")
         return
     if svnd['branch'] is None:
@@ -91,8 +81,7 @@ def checkbug(repos, txn):
         logger.error(msg)
         sys.exit(msg)
     if nrd['project'][1] == 'no_project':
-        msg = "0110: Commit failed: PRN%s is marked '%s'" % (svnd['prn'],
-                nrd['project'][0])
+        msg = "0110: Commit failed: PRN%s is marked '%s'" % (svnd['prn'], nrd['project'][0])
         logger.error(msg)
         sys.exit(msg)
     if nrd['status'] != 'Assigned':
@@ -137,29 +126,28 @@ def checkbug(repos, txn):
     #
     # TODO remove the duplication
     if nrd['project'][1] == '10_2_0000' and svnd['branch'] == 'Charlie':
-        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
         write_debug(msg)
         logger.info(msg)
         return
     elif nrd['project'][1] == '10_1_0000' and svnd['branch'] == 'Viper':
-        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
         write_debug(msg)
         logger.info(msg)
         return
-    elif nrd['project'][1] == '10_1_0000' and (svnd['branch'] == 'AvayaPDS' or
-            svnd['branch'] == 'JTAPI'):
-        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+    elif nrd['project'][1] == '10_1_0000' and (svnd['branch'] == 'AvayaPDS' or svnd['branch'] == 'JTAPI'):
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
         write_debug(msg)
         logger.info(msg)
         return
     # NB, 10.0/maintenance/base is in here twice (on purpose)
     elif nrd['project'][1] == '10_0_0200' and svnd['branch'] == '10_0_m':
-        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
         write_debug(msg)
         logger.info(msg)
         return
     elif nrd['project'][1] == 'patch' and svnd['branch'] == '10_0_m':
-        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
         write_debug(msg)
         logger.info(msg)
         return
@@ -168,7 +156,7 @@ def checkbug(repos, txn):
             svnd['branch'] == '10_0_0115' or \
             svnd['branch'] == '10_0_0208' or \
             svnd['branch'] == '10_0_0214':
-        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
         write_debug(msg)
         logger.info(msg)
         return
@@ -180,4 +168,3 @@ if __name__ == '__main__':
     repos = sys.argv[1]
     txn = sys.argv[2]
     checkbug(repos, txn)
-
