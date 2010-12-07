@@ -4,13 +4,14 @@
 # NOTE: Use sys.stderr.write() to pass messages back to the calling process.
 
 import bugbranch
+from bugbranch import write_debug
 import ConfigParser
 import logging
 import logging.handlers
 import os.path
 import sys
 
-BBROOT = r'F:/Repositories/ETCM.next/CommitHooks/BugBranch'
+BBROOT = r'F:/Repositories/newbugbranch/CommitHooks/BugBranch'
 INI_FILE = os.path.join(BBROOT, 'bugbranch.ini')
 LOG_FILE = os.path.join(BBROOT, 'bugbranch.log')
 
@@ -44,12 +45,11 @@ mailhandler.setFormatter(formatter)
 logger.addHandler(mailhandler)
 
 
-# Accept multiple arguments, print them all on one line.  TODO this needs to be
-# in a utilities module somewhere, so it's accessible by all.
-def write_debug(*args):
-    for arg in args:
-        sys.stderr.write(arg),
-    sys.stderr.write("\n")
+# Accept multiple arguments, print them all on one line.
+#def write_debug(*args):
+#    for arg in args:
+#        sys.stderr.write(arg),
+#    sys.stderr.write("\n")
 
 def checkbug(repos, txn):
     '''DOCSTRING'''
@@ -70,13 +70,6 @@ def checkbug(repos, txn):
         svnd_p += ("\n  %s=%s" % (key, value))
     logger.debug(svnd_p)
 
-    # This is not enough to ensure that only automated commits happen with the
-    # buildmgr account.  I can still login as buildmgr as usual and use 00000.
-    if svnd['prn'] == '00000' and svnd['author'] == 'buildmgr':
-        # INFO
-        logger.info("svnd['prn'] == '00000' and svnd['author'] == 'buildmgr'")
-        return
-
     nr = bugbranch.NetResults()
     # prn, title, assigned_to, status, project
     nrd = nr.get_details(svnd['prn'])
@@ -88,218 +81,103 @@ def checkbug(repos, txn):
     logger.debug(nrd_p)
 
     # do checks
+    #
+    if svnd['prn'] == '00000' and svnd['author'] == 'buildmgr':
+        # INFO
+        logger.info("svnd['prn'] == '00000' and svnd['author'] == 'buildmgr'")
+        return
     if svnd['branch'] is None:
         msg = "0100: Commit failed: branch not found in active list"
         logger.error(msg)
         sys.exit(msg)
-
+    if nrd['project'][1] == 'no_project':
+        msg = "0110: Commit failed: PRN%s is marked '%s'" % (svnd['prn'],
+                nrd['project'][0])
+        logger.error(msg)
+        sys.exit(msg)
     if nrd['status'] != 'Assigned':
-        msg = "0110: Commit failed: PRN%s is not Assigned (it's %s)" % (svnd['prn'], nrd['status'])
+        msg = "0120: Commit failed: PRN%s is not Assigned (it's %s)" % (svnd['prn'], nrd['status'])
         logger.error(msg)
         sys.exit(msg)
-
-    # This is unlikely to happen.
     if svnd['prn'] != nrd['prn']:
-        msg = "0120: Commit failed: invalid PRN number (%s != %s)" % (svnd['prn'], nrd['prn'])
+        msg = "0130: Commit failed: invalid PRN number (%s != %s)" % (svnd['prn'], nrd['prn'])
         logger.error(msg)
         sys.exit(msg)
-
     # convert SVN name to PT name, then compare
     if svnd['author'] != nr.name(nrd['assigned_to']):
-        msg = "0130: PRN is assigned to %s, not %s" % (nr.name(nrd['assigned_to']), svnd['author'])
+        msg = "0140: PRN is assigned to %s, not %s" % (nr.name(nrd['assigned_to']), svnd['author'])
         logger.error(msg)
         sys.exit(msg)
 
     #
-    # the stupid sh** starts right here
+    # Branches and abbreviations
+    #   '9_10_m':       r'branches\9.10\maintenance\base',
+    #   '10_0_m':       r'branches\10.0\maintenance\base',
+    #   '10_0_0115':    r'branches\10.0\maintenance\10.0.0115',
+    #   '10_0_0208':    r'branches\10.0\maintenance\10.0.0208',
+    #   '10_0_0214':    r'branches\10.0\maintenance\10.0.0214',
+    #   'Viper':        r'branches\projects\Viper',
+    #   'AvayaPDS':     r'branches\projects\AvayaPDS',
+    #   'JTAPI':        r'branches\projects\JTAPI',
     #
-    # 1: [request type]
-    #       branch:                 for branch maintenance
-    #       all others:             don't care
+    # NetResults projects
+    #   '10.2.0000 (Charlie)'
+    #   '10.1.0000 (Viper)'
+    #   '10.0.0200 (10.0.SP2)'
+    #   'Patch'
+    #   'No Planned Project'
+    #   '8.4.9002 (8.4.SP9.HF2)'    [skip this one]
     #
-    # 2: [assigned to project]
-    #       '10.1.0000 (Viper)':    'Viper'
-    #       '10.2.0000 (Charlie)':  'Charlie'
-    #       '10.0.0200 (10.0SP2)':  'branches\10.0\maintenance\base'
-    #       "Patch": [
-    #                               'branches\10.0\maintenance\base' (DUP)
-    #                               'branches\10.0\maintenance\10.0.0115',
-    #                               'branches\10.0\maintenance\10.0.0208',
-    #                               'branches\10.0\maintenance\10.0.0214'
-    #                ]
 
-    # short circuit if we're using a Branch PRN to commit to a maintenance or
-    # project branch (what about patch branches?)
-    if nrd['request_type'] == "Branch":
-        write_debug("it's a Branch PRN")
-        if svnd['branch'] == "Viper":
-            write_debug("it's a Branch PRN (Viper)")
-        elif svnd['branch'] == "Patch":
-            write_debug("it's a Branch PRN (a patch branch)")
-        else:
-            try:
-                tmp1, tmp2 = svnd['branch'].split(',')
-                # DEBUG
-                logger.debug("tmp1:%s" % tmp1)
-                logger.debug("tmp2:%s" % tmp2)
-
-                # you believe this crap?
-                svn_mjr = tmp1.strip(' (')
-                svn_mnr = tmp2.strip(' )')
-                # if we get here, it's a maintenance branch and we're
-                # committing with a branch PRN
-                return
-            except:
-                write_debug("it's a Branch PRN (but I can't identify it)")
-    elif nrd['request_type'] == "Feature Work PRN":
-        write_debug("it's a Feature Work PRN")
-        if svnd['branch'] == "ADLogin":
-            write_debug("it's a Branch PRN (ADLogin)")
+    # Note: I'm not going to bother with nrd['request_type'] for now.  Maybe
+    # later.  It was in there before, but I don't see the benefit.
+    #
+    # This will be a pain to maintain.  I should take another look at decision
+    # tables.
+    #
+    # TODO remove the duplication
+    if nrd['project'][1] == '10_2_0000' and svnd['branch'] == 'Charlie':
+        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        write_debug(msg)
+        logger.info(msg)
+        return
+    elif nrd['project'][1] == '10_1_0000' and svnd['branch'] == 'Viper':
+        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        write_debug(msg)
+        logger.info(msg)
+        return
+    elif nrd['project'][1] == '10_1_0000' and (svnd['branch'] == 'AvayaPDS' or
+            svnd['branch'] == 'JTAPI'):
+        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        write_debug(msg)
+        logger.info(msg)
+        return
+    # NB, 10.0/maintenance/base is in here twice (on purpose)
+    elif nrd['project'][1] == '10_0_0200' and svnd['branch'] == '10_0_m':
+        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        write_debug(msg)
+        logger.info(msg)
+        return
+    elif nrd['project'][1] == 'patch' and svnd['branch'] == '10_0_m':
+        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        write_debug(msg)
+        logger.info(msg)
+        return
+    elif nrd['project'][1] == 'patch' and \
+            svnd['branch'] == '9_10_m'    or \
+            svnd['branch'] == '10_0_0115' or \
+            svnd['branch'] == '10_0_0208' or \
+            svnd['branch'] == '10_0_0214':
+        msg = "[debug driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+        write_debug(msg)
+        logger.info(msg)
         return
     else:
-        write_debug("[debug] it's not a Branch PRN")
-
-    # check the project versus the branch path
-    if svnd['branch'] is None:
-        msg = "0140: SVN branch %s not found in Problem Tracker - maybe it's new?" \
-                % (svnd['branch'])
-        logger.error(msg)
+        msg = "error: NRD %s, SVN %s" % (nrd['project'][0], svnd['branch'])
         sys.exit(msg)
-    # FIXME these two if statements are almost identical
-    elif svnd['branch'] == "Viper":
-        msg = "0150: SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
-        # FIXME The project name should be cleaned up before we get here.
-        if nrd['project'] == "10.1.0000 (Viper)":
-            logger.info(msg)
-            return
-        elif nrd['project'] == "Patch":
-            logger.info(msg)
-            return
-        else:
-            logger.error(msg)
-            sys.exit(msg)
-    elif svnd['branch'] == "JTAPI":
-        msg = "0151: SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
-        # FIXME The project name should be cleaned up before we get here.
-        if nrd['project'] == "10.1.0000 (Viper)":
-            logger.info(msg)
-            return
-        elif nrd['project'] == "Patch":
-            logger.info(msg)
-            return
-        else:
-            logger.error(msg)
-            sys.exit(msg)
-    # FIXME This will throw a ValueError if svnd['branch'] == "Patch" but
-    # nrd['project'] != "Engineering Build"
-    #
-    # Late note: "Engineering Build" is now "Patch" in PT, so this FIXME is
-    # deprecated.  I'll remove it soon.
-    # target2: maintenance branches
-    elif svnd['branch'] == "Patch":
-        msg = "0160: SVN branch is '%s' and PT project is '%s'" % (svnd['branch'], nrd['project'])
-        if nrd['project'] == "Patch":
-            logger.info(msg)
-            return
-        # allow branch PRNs to commit merges to multiple branches (2)
-        elif nrd['request_type'] == "Branch":
-            msg += " // branch PRN"
-            logger.info(msg)
-            return
-        else:
-            logger.error(msg)
-            sys.exit(msg)
-
-    # BUGBUG if branch is "Viper", but the project is not, it falls thru to
-    # here and breaks on the split(',').  Same thing is likely to happen with
-    # the patch branches.
-
-    # I'd like to find a better way to do this
-    #
-    # target3: maintenance or patch branches
-    else:
-        logger.debug(svnd['branch'])
-        # We now have a string disguised as a two-tuple; looks like "(10, 0)".
-        # This is where things get ugly (or uglier).
-        tmp1, tmp2 = svnd['branch'].split(',')
-        # DEBUG
-        logger.debug("tmp1:%s" % tmp1)
-        logger.debug("tmp2:%s" % tmp2)
-
-        # you believe this crap?
-        svn_mjr = tmp1.strip(' (')
-        svn_mnr = tmp2.strip(' )')
-        # DEBUG
-        logger.debug("svn_mjr:%s" % svn_mjr)
-        logger.debug("svn_mnr:%s" % svn_mnr)
-
-        # Split strings like "10.0.0200 (10.0.SP2)" or "10.1.0000 (Viper)",
-        # leaving junk behind.
-        #
-        # Caution: this could be just "Patch" (from PT).
-        if nrd['project'] == "Patch":
-            # (this sucks)
-            msg = "0170: Error: SVN branch is '%s' and PT project is '%s'" \
-                    % (svnd['branch'], nrd['project'])
-#            logger.error(msg)
-#            sys.exit(msg)
-            # ugly - PRN22308
-            logger.info(msg)
-            return
-        else:
-            try:
-                pt_ver, junk = nrd['project'].split()
-            except ValueError:
-                # This would happen if there's a single "word" in the project
-                # field.  We shouldn't see this, but if we do, error and exit.
-                msg = "0180: Something broke while getting the PT version"
-                logger.error(msg)
-                sys.exit(msg)
-
-        # Expect ValueErrors here if the input is not a three-part version
-        # number.  This would fail on projects in "Patch" (formerly
-        # "Engineering Build"), but those should have been caught earlier.
-        pt_mjr, pt_mnr, pt_SPpn = pt_ver.split('.')
-
-        # We're committing to a maintenance branch, and the PRN is for the
-        # same major.minor.  Since service packs (.0100, .0200, etc.), are in
-        # maintenance branches, this is the only verification available to us.
-        # The PRN provides SPpn, but the branch is no help here.
-        if svn_mjr == pt_mjr and svn_mnr == pt_mnr:
-            msg = "svn_mjr == pt_mjr and svn_mnr == pt_mnr (%s==%s, %s==%s)" \
-                    % (svn_mjr, pt_mjr, svn_mnr, pt_mnr)
-            logger.info(msg)
-            return
-        # allow branch PRNs to commit merges to multiple branches (3)
-        elif nrd['request_type'] == "Branch":
-            msg += " // branch PRN"
-            logger.info(msg)
-            return
-        else:
-            msg = "Error: it looks like the SVN branch you're committing to\n"
-            msg += "  doesn't match up with the 'Assigned to Project' data in\n"
-            msg += "  Problem Tracker.  If this is not the case, and something\n"
-            msg += "  else is going on, please contact the maintainer.\n\n"
-            msg += "This might help:\n"
-            msg += "  SVN branch MAJOR.MINOR:%s.%s\n" % (svn_mjr, svn_mnr)
-            msg += "  PT project MAJOR.MINOR:%s.%s" % (pt_mjr, pt_mnr)
-            write_debug(msg)
-
-            logmsg = "0190: %s.%s != %s.%s (SVN branch != PT project)\n" \
-                    % (svn_mjr, svn_mnr, pt_mjr, pt_mnr)
-            logger.error(logmsg)
-            sys.exit(1)
-
-    # ERROR that should probably be EXCEPTION
-    msg = "0200: Unknown condition (contact the maintainer)"
-    logger.error(msg)
-    logger.error(".. ", svnd_p)
-    logger.error(".. ", nrd_p)
 
 if __name__ == '__main__':
     repos = sys.argv[1]
     txn = sys.argv[2]
-#    sys.stderr.write('before checkbug()\n')
     checkbug(repos, txn)
-#    sys.stderr.write('after checkbug()\n')
 
