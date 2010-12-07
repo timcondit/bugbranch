@@ -111,7 +111,7 @@ class Subversion(object):
         '''Returns the branch for this transaction (string)'''
         # paths looks like ['A   path/to/file1.txt\r', 'M   path/to/file2.txt']
         paths = self.__changed().split('\n')
-        write_debug("[debug] paths: %s" % paths)
+        #write_debug("[debug] paths: %s" % paths)
         branch = None
 
         last_line = ""
@@ -123,7 +123,7 @@ class Subversion(object):
 
         # 'A   path/to/file1.txt\r' --> 'A   path', 'to', 'file1.txt\r'
         parts = os.path.normpath(last_line).split("   ")
-        write_debug("[debug] parts: %s" % parts)
+        #write_debug("[debug] parts: %s" % parts)
 
         # TODO these should be in bugbranch.ini
         branches = {
@@ -137,14 +137,13 @@ class Subversion(object):
                 'JTAPI':        r'branches\projects\JTAPI',
                 }
 
-        write_debug("branches: %s\n" % os.path.normpath(str(branches)))
-        write_debug("[debug] os.path.normpath(parts[1]): %s" %
-                os.path.normpath(parts[1]))
+        #write_debug("branches: %s\n" % os.path.normpath(str(branches)))
+        #write_debug("[debug] os.path.normpath(parts[1]): %s" % os.path.normpath(parts[1]))
         for abbr, branch in branches.items():
             if branch in os.path.normpath(parts[1]):
-                write_debug("found a match: %s" % branch)
+                #write_debug("found a match: %s" % branch)
                 return abbr
-        write_debug("[debug] SVN nothing matches")
+        #write_debug("[debug] SVN nothing matches")
         return None
 
     # Actually, it returns a string that looks like a list
