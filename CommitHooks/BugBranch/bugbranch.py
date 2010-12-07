@@ -12,21 +12,19 @@ from svn import core, fs, repos
 # NOTE: Use sys.stderr.write() to pass messages back to the calling process.
 
 config = ConfigParser.SafeConfigParser()
-config.read(r'F:/Repositories/ETCM.next/CommitHooks/BugBranch/bugbranch.ini')
+config.read(r'F:/Repositories/newbugbranch/CommitHooks/BugBranch/bugbranch.ini')
 SVNLOOK = os.path.normpath(config.get('runtime','svnlook'))
 DEBUG = os.path.normpath(config.get('runtime','debug'))
 
 
-# Accept multiple arguments, print them all on one line.  TODO this needs to be
-# in a utilities module somewhere, so it's accessible by all.
+# Accept multiple arguments, print them all on one line.
 def write_debug(*args):
     for arg in args:
         sys.stderr.write(arg),
     sys.stderr.write("\n")
 
-# NOTE: I'm changing the "delivery model" here.  Rather than expose a bunch of
-# methods and leave the driver to sort it out, the Subversion class will
-# expose one method that will round up all relevant data and return a dict.
+# The Subversion class exposes one method that will round up all relevant data
+# and return a dict.
 class Subversion(object):
     '''DOCSTRING'''
     def __init__(self, repos_path, txn_name):
@@ -127,23 +125,26 @@ class Subversion(object):
         parts = os.path.normpath(last_line).split("   ")
         write_debug("[debug] parts: %s" % parts)
 
-        # TODO this should be in bugbranch.ini
-        branches = [
-                r'branches\9.10\maintenance\base',
-                r'branches\10.0\maintenance\base',
-                r'branches\10.0\maintenance\10.0.0115',
-                r'branches\10.0\maintenance\10.0.0208',
-                r'branches\10.0\maintenance\10.0.0214',
-                r'branches\projects\Viper',
-                ]
+        # TODO these should be in bugbranch.ini
+        branches = {
+                '9_10_m':       r'branches\9.10\maintenance\base',
+                '10_0_m':       r'branches\10.0\maintenance\base',
+                '10_0_0115':    r'branches\10.0\maintenance\10.0.0115',
+                '10_0_0208':    r'branches\10.0\maintenance\10.0.0208',
+                '10_0_0214':    r'branches\10.0\maintenance\10.0.0214',
+                'Viper':        r'branches\projects\Viper',
+                'AvayaPDS':     r'branches\projects\AvayaPDS',
+                'JTAPI':        r'branches\projects\JTAPI',
+                }
 
         write_debug("branches: %s\n" % os.path.normpath(str(branches)))
         write_debug("[debug] os.path.normpath(parts[1]): %s" %
                 os.path.normpath(parts[1]))
-        for branch in branches:
+        for abbr, branch in branches.items():
             if branch in os.path.normpath(parts[1]):
                 write_debug("found a match: %s" % branch)
-                return branch
+                return abbr
+        write_debug("[debug] SVN nothing matches")
         return None
 
     # Actually, it returns a string that looks like a list
@@ -186,11 +187,24 @@ class NetResults(object):
         details['title'] = str(tmp.Text1) or None
         details['assigned_to'] = str(tmp.Assignee) or None
         details['status'] = str(tmp.Status) or None
-        details['project'] = str(tmp.Pulldown8) or None
+        details['project'] = self.__project(str(tmp.Pulldown8)) or None
         details['request_type'] = str(tmp.Pulldown2) or None
         if DEBUG == "True":
             write_debug("[bugbranch] NetResults details:", str(details))
         return details
+
+    def __project(self, project_str):
+        '''Returns a unique string for each active project'''
+        projects = {
+                '10.2.0000 (Charlie)': '10_2_0000',
+                '10.1.0000 (Viper)': '10_1_0000',
+                '10.0.0200 (10.0.SP2)': '10_0_0200',
+                'Patch': 'patch',
+                'No Planned Project': 'no_project',
+                }
+        for key, value in projects.items():
+            if project_str in key:
+                return (key, value)
 
     def __prn(self, prn):
         '''Returns the PRN contents as a list if found, or None'''
