@@ -52,6 +52,7 @@ def checkbug(repos, txn):
 
     # repos, txn come from commit hook (pre-commit.bat)
     svn = bugbranch.Subversion(repos, txn)
+
     # prn, separator, commit_text, author, branch
     svnd = svn.get_details()
 
@@ -134,6 +135,7 @@ def checkbug(repos, txn):
         msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
         write_debug(msg)
         logger.info(msg)
+        nr.update_record(svnd['prn'],svnd['commit_text'], svn.modified_files())
         return
     elif nrd['project'][1] == '10_1_0000' and (svnd['branch'] == 'AvayaPDS' or svnd['branch'] == 'JTAPI'):
         msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])

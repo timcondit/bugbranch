@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 from svn import core, fs, repos
+from time import strftime
 
 # NOTE: Use sys.stderr.write() to pass messages back to the calling process.
 
@@ -35,6 +36,7 @@ class Subversion(object):
         self.repos_path = core.svn_path_canonicalize(repos_path)
         self.fs = repos.svn_repos_fs(repos.svn_repos_open(repos_path))
         self.txn = fs.svn_fs_open_txn(self.fs, txn_name)
+        self.txn_root = fs.svn_fs_txn_root(self.txn)
 
     def get_details(self):
         '''DOCSTRING'''
@@ -54,7 +56,7 @@ class Subversion(object):
     def __prn(self):
         '''Returns the PRN number from a Subversion transaction, or None'''
         try:
-            return self.__commit_re().match(self.__log()).group('prn_number')
+            return self.__commit_re().match(self.log()).group('prn_number')
         # Fatal error.  Exit immediately.
         except IndexError:
             sys.exit('[prn] Malformed commit message (PRN number missing?)')
@@ -66,7 +68,7 @@ class Subversion(object):
         '''A completely useless method'''
         # If this method causes trouble, delete it.
         try:
-            return self.__commit_re().match(self.__log()).group('separator')
+            return self.__commit_re().match(self.log()).group('separator')
         except IndexError:
             sys.exit('[sep] Malformed commit message (separator missing?)')
         except AttributeError:
@@ -76,7 +78,7 @@ class Subversion(object):
     def __commit_text(self):
         '''Returns the commit text from a Subversion transaction, or None'''
         try:
-            return self.__commit_re().match(self.__log()).group('commit_text')
+            return self.__commit_re().match(self.log()).group('commit_text')
         # Fatal error.  Exit immediately.
         except IndexError:
             sys.exit('[commit_text] Malformed commit message (commit text missing?)')
@@ -110,7 +112,7 @@ class Subversion(object):
     def __modified_branch(self):
         '''Returns the branch for this transaction (string)'''
         # paths looks like ['A   path/to/file1.txt\r', 'M   path/to/file2.txt']
-        paths = self.__changed().split('\n')
+        paths = self.changed().split('\n')
         #write_debug("[debug] paths: %s" % paths)
         branch = None
 
@@ -147,8 +149,15 @@ class Subversion(object):
         return None
 
     # Actually, it returns a string that looks like a list
-    def __changed(self):
+    def changed(self):
         '''Returns the list of files changed in this transaction'''
+        # txn_root = svn.fs.svn_fs_txn_root(txn)
+        # txn_root = svn.fs.svn_fs_txn_root(self.txn)
+#        changed_paths = fs.paths_changed(self.txn_root)
+#        for key, value in changed_paths.items():
+#            write_debug(str(type(key)), str(type(value)))
+#        write_debug("xxx:", changed_paths.items())
+
         p = subprocess.Popen([SVNLOOK, 'changed', self.rpath, '-t', self.tname],
                 stdin = subprocess.PIPE,
                 stdout = subprocess.PIPE,
@@ -159,7 +168,11 @@ class Subversion(object):
             write_debug("[changed] stderr:", stderr_text.strip('\n'))
         return stdout_text.strip()
 
-    def __log(self):
+    def modified_files(self):
+        '''A better (but new and unfamiliar) way to get the changed files'''
+        return fs.paths_changed(self.txn_root).keys()
+
+    def log(self):
         '''Returns the entire SVN log message (private method)'''
         tmp = fs.svn_fs_txn_prop(self.txn, "svn:log")
         if DEBUG == "True":
@@ -170,12 +183,12 @@ class Subversion(object):
 class NetResults(object):
     '''DOCSTRING'''
     def __init__(self):
-        conn = pyodbc.connect('''
+        self.conn = pyodbc.connect('''
             DRIVER={SQL Server};
             SERVER=CHINOOK;
             DATABASE=ProblemTracker;
             Trusted_Connection=yes''')
-        self.cursor = conn.cursor()
+        self.cursor = self.conn.cursor()
 
     def get_details(self, prn_from_svn):
         '''DOCSTRING'''
@@ -233,6 +246,32 @@ class NetResults(object):
             if DEBUG == "True":
                 write_debug("name:", str(name), "\n")
             sys.exit('Error: something broke in NetResults::name()')
+
+    def update_record(self, prn, svn_log, mod_files):
+        '''Writes the validated commit message to the specified PRN'''
+        # need the fields
+        now = strftime("%a, %d %b %Y %H:%M:%S")
+#        message = "this is a test baba booey"
+        description = '\n==== Updated on %s ====' % now
+        description += '\nMessage: %s' % svn_log
+        description += '\nRevision: %s' % 'revision TBD'
+        description += '\nBranch: %s' % 'branch TBD'
+        description += '\nModified-Files:\n%s\n' % mod_files
+        #self.cursor.execute("""
+        #    UPDATE NRTracker.Records
+        #    SET BigText1 = cast(BigText1 as varchar(7000)) + CHAR(13) +
+        #    CHAR(13) + '==== Updated on ' + Convert(varchar(20), GetDate()) +
+        #    ' ====' + CHAR(13) + Convert(varchar(7000), ?)
+        #    WHERE PRN = ?
+        #    """, prn, message)
+        self.cursor.execute("""
+            UPDATE NRTracker.Records
+            SET BigText1 = Convert(varchar(7000), BigText1) + Convert(varchar(7000), ?) WHERE PRN = ?
+            """, description, prn)
+        #    """, message, prn)
+        #    SET BigText1 = ? WHERE PRN = ?
+        #    """, description, prn)
+        self.conn.commit()
 
 
 if __name__ == '__main__':
