@@ -49,7 +49,7 @@ class Subversion(object):
         if details['prn'] == '00000' and details['author'] == 'buildmgr':
             details['branch'] = None
         else:
-            details['branch'] = str(self.__modified_branch()) or None
+            details['branch'] = self.__modified_branch() or None
         if DEBUG == "True":
             write_debug("[debug] svn details:", str(details))
         return details
@@ -144,9 +144,7 @@ class Subversion(object):
         #write_debug("[debug] os.path.normpath(parts[1]): %s" % os.path.normpath(parts[1]))
         for abbr, branch in branches.items():
             if branch in os.path.normpath(parts[1]):
-                #write_debug("found a match: %s" % branch)
-                return abbr
-        #write_debug("[debug] SVN nothing matches")
+                return (abbr, branch)
         return None
 
     # Actually, it returns a string that looks like a list
@@ -263,30 +261,28 @@ class NetResults(object):
                 write_debug("name:", str(name), "\n")
             sys.exit('Error: something broke in NetResults::name()')
 
-    def update_record(self, prn, svn_log, rev, mod_files):
+    def update_record(self, prn, svn_author, svn_log, svn_rev, svn_branch,
+            mod_files):
         '''Writes the validated commit message to the specified PRN'''
         # need the fields
         now = strftime("%a, %d %b %Y %H:%M:%S")
 #        message = "this is a test baba booey"
         description = '\n==== Updated on %s ====' % now
+        description += '\nAuthor: %s' % svn_author
         description += '\nMessage: %s' % svn_log
-        description += '\nRevision: %s' % rev
-        description += '\nBranch: %s' % 'branch TBD'
-        description += '\nModified-Files:\n%s\n' % mod_files
-        #self.cursor.execute("""
-        #    UPDATE NRTracker.Records
-        #    SET BigText1 = cast(BigText1 as varchar(7000)) + CHAR(13) +
-        #    CHAR(13) + '==== Updated on ' + Convert(varchar(20), GetDate()) +
-        #    ' ====' + CHAR(13) + Convert(varchar(7000), ?)
-        #    WHERE PRN = ?
-        #    """, prn, message)
+        description += '\nRevision: %s' % svn_rev
+        description += '\nBranch: %s' % svn_branch
+        # mod_files is a list
+        description += '\nModified-Files:'
+        for file in mod_files:
+            description += '\n  %s' % file
+        description += '\n'
+
         self.cursor.execute("""
             UPDATE NRTracker.Records
-            SET BigText1 = Convert(varchar(7000), BigText1) + Convert(varchar(7000), ?) WHERE PRN = ?
+            SET BigText1 = Convert(varchar(7000), BigText1) +
+            Convert(varchar(7000), ?) WHERE PRN = ?
             """, description, prn)
-        #    """, message, prn)
-        #    SET BigText1 = ? WHERE PRN = ?
-        #    """, description, prn)
         self.conn.commit()
 
 

@@ -77,7 +77,7 @@ def checkbug(repos, txn):
     if svnd['prn'] == '00000' and svnd['author'] == 'buildmgr':
         logger.info("svnd['prn'] == '00000' and svnd['author'] == 'buildmgr'")
         return
-    if svnd['branch'] is None:
+    if svnd['branch'][0] is None:
         msg = "0100: Commit failed: branch not found in active list"
         logger.error(msg)
         sys.exit(msg)
@@ -126,46 +126,50 @@ def checkbug(repos, txn):
     # tables.
     #
     # TODO remove the duplication
-    if nrd['project'][1] == '10_2_0000' and svnd['branch'] == 'Charlie':
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+    if nrd['project'][1] == '10_2_0000' and svnd['branch'][0] == 'Charlie':
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
         write_debug(msg)
         logger.info(msg)
         return
-    elif nrd['project'][1] == '10_1_0000' and svnd['branch'] == 'Viper':
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+    elif nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'Viper':
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
         write_debug(msg)
         logger.info(msg)
         write_debug(svnd['revision'])
-        nr.update_record(svnd['prn'], svnd['commit_text'], svnd['revision'],
-                svn.modified_files())
+        nr.update_record(svnd['prn'], svnd['author'], svnd['commit_text'],
+                svnd['revision'], svnd['branch'][1], svn.modified_files())
         return
-    elif nrd['project'][1] == '10_1_0000' and (svnd['branch'] == 'AvayaPDS' or svnd['branch'] == 'JTAPI'):
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+    elif nrd['project'][1] == '10_1_0000' and (svnd['branch'][0] == 'AvayaPDS'
+            or svnd['branch'][0] == 'JTAPI'):
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
         write_debug(msg)
         logger.info(msg)
         return
     # NB, 10.0/maintenance/base is in here twice (on purpose)
-    elif nrd['project'][1] == '10_0_0200' and svnd['branch'] == '10_0_m':
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+    elif nrd['project'][1] == '10_0_0200' and svnd['branch'][0] == '10_0_m':
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
         write_debug(msg)
         logger.info(msg)
+        write_debug(svnd['revision'])
+        nr.update_record(svnd['prn'], svnd['author'], svnd['commit_text'],
+                svnd['revision'], svnd['branch'][1], svn.modified_files())
         return
-    elif nrd['project'][1] == 'patch' and svnd['branch'] == '10_0_m':
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+    elif nrd['project'][1] == 'patch' and svnd['branch'][0] == '10_0_m':
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
         write_debug(msg)
         logger.info(msg)
         return
     elif nrd['project'][1] == 'patch' and \
-            svnd['branch'] == '9_10_m'    or \
-            svnd['branch'] == '10_0_0115' or \
-            svnd['branch'] == '10_0_0208' or \
-            svnd['branch'] == '10_0_0214':
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'])
+            svnd['branch'][0] == '9_10_m'    or \
+            svnd['branch'][0] == '10_0_0115' or \
+            svnd['branch'][0] == '10_0_0208' or \
+            svnd['branch'][0] == '10_0_0214':
+        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
         write_debug(msg)
         logger.info(msg)
         return
     else:
-        msg = "error: NRD %s, SVN %s" % (nrd['project'][0], svnd['branch'])
+        msg = "error: NRD %s, SVN %s" % (nrd['project'][0], svnd['branch'][0])
         sys.exit(msg)
 
 if __name__ == '__main__':
