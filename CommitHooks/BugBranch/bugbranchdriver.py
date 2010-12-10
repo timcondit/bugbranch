@@ -122,51 +122,23 @@ def checkbug(repos, txn):
     # Note: I'm not going to bother with nrd['request_type'] for now.  Maybe
     # later.  It was in there before, but I don't see the benefit.
     #
-    # This will be a pain to maintain.  I should take another look at decision
-    # tables.
-    #
-    # TODO remove the duplication
-    if nrd['project'][1] == '10_2_0000' and svnd['branch'][0] == 'Charlie':
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
-        write_debug(msg)
-        logger.info(msg)
-        return
-    elif nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'Viper':
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
-        write_debug(msg)
-        logger.info(msg)
-        write_debug(svnd['revision'])
-        nr.update_record(svnd['prn'], svnd['author'], svnd['commit_text'],
-                svnd['revision'], svnd['branch'][1], svn.modified_files())
-        return
-    elif nrd['project'][1] == '10_1_0000' and (svnd['branch'][0] == 'AvayaPDS'
-            or svnd['branch'][0] == 'JTAPI'):
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
-        write_debug(msg)
-        logger.info(msg)
-        return
-    # NB, 10.0/maintenance/base is in here twice (on purpose)
-    elif nrd['project'][1] == '10_0_0200' and svnd['branch'][0] == '10_0_m':
+    # This is where the decision table would be nice.
+    if (nrd['project'][1] == '10_2_0000'      and svnd['branch'][0] == 'Charlie')  or \
+            (nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'Viper')    or \
+            (nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'AvayaPDS') or \
+            (nrd['project'][1] == '10_0_0200' and svnd['branch'][0] == '10_0_m')   or \
+            (nrd['project'][1] == 'patch'     and svnd['branch'][0] == '10_0_m')   or \
+            (nrd['project'][1] == 'patch')           and \
+                    (svnd['branch'][0] == '9_10_m'   or \
+                    svnd['branch'][0] == '10_0_0115' or \
+                    svnd['branch'][0] == '10_0_0208' or \
+                    svnd['branch'][0] == '10_0_0214'):
         msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
         write_debug(msg)
         logger.info(msg)
         write_debug(svnd['revision'])
         nr.update_record(svnd['prn'], svnd['author'], svnd['commit_text'],
                 svnd['revision'], svnd['branch'][1], svn.modified_files())
-        return
-    elif nrd['project'][1] == 'patch' and svnd['branch'][0] == '10_0_m':
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
-        write_debug(msg)
-        logger.info(msg)
-        return
-    elif nrd['project'][1] == 'patch' and \
-            svnd['branch'][0] == '9_10_m'    or \
-            svnd['branch'][0] == '10_0_0115' or \
-            svnd['branch'][0] == '10_0_0208' or \
-            svnd['branch'][0] == '10_0_0214':
-        msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
-        write_debug(msg)
-        logger.info(msg)
         return
     else:
         msg = "error: NRD %s, SVN %s" % (nrd['project'][0], svnd['branch'][0])
@@ -176,3 +148,4 @@ if __name__ == '__main__':
     repos = sys.argv[1]
     txn = sys.argv[2]
     checkbug(repos, txn)
+

@@ -114,9 +114,7 @@ class Subversion(object):
         '''Returns the branch for this transaction (string)'''
         # paths looks like ['A   path/to/file1.txt\r', 'M   path/to/file2.txt']
         paths = self.changed().split('\n')
-        #write_debug("[debug] paths: %s" % paths)
         branch = None
-
         last_line = ""
         try:
             last_line = paths[-1]
@@ -126,8 +124,6 @@ class Subversion(object):
 
         # 'A   path/to/file1.txt\r' --> 'A   path', 'to', 'file1.txt\r'
         parts = os.path.normpath(last_line).split("   ")
-        #write_debug("[debug] parts: %s" % parts)
-
         # TODO these should be in bugbranch.ini
         branches = {
                 '9_10_m':       r'branches\9.10\maintenance\base',
@@ -139,9 +135,6 @@ class Subversion(object):
                 'AvayaPDS':     r'branches\projects\AvayaPDS',
                 'JTAPI':        r'branches\projects\JTAPI',
                 }
-
-        #write_debug("branches: %s\n" % os.path.normpath(str(branches)))
-        #write_debug("[debug] os.path.normpath(parts[1]): %s" % os.path.normpath(parts[1]))
         for abbr, branch in branches.items():
             if branch in os.path.normpath(parts[1]):
                 return (abbr, branch)
@@ -150,13 +143,6 @@ class Subversion(object):
     # Actually, it returns a string that looks like a list
     def changed(self):
         '''Returns the list of files changed in this transaction'''
-        # txn_root = svn.fs.svn_fs_txn_root(txn)
-        # txn_root = svn.fs.svn_fs_txn_root(self.txn)
-#        changed_paths = fs.paths_changed(self.txn_root)
-#        for key, value in changed_paths.items():
-#            write_debug(str(type(key)), str(type(value)))
-#        write_debug("xxx:", changed_paths.items())
-
         p = subprocess.Popen([SVNLOOK, 'changed', self.rpath, '-t', self.tname],
                 stdin = subprocess.PIPE,
                 stdout = subprocess.PIPE,
@@ -178,7 +164,7 @@ class Subversion(object):
                 stderr = subprocess.PIPE)
         stdout_text, stderr_text = p.communicate(None)
 #        return stdout_text.strip()
-        # ugly
+        # ugly coercion
         tmp = int(stdout_text.strip()) + 1
         return str(tmp)
 
@@ -267,7 +253,7 @@ class NetResults(object):
         # need the fields
         now = strftime("%a, %d %b %Y %H:%M:%S")
 #        message = "this is a test baba booey"
-        description = '\n==== Updated on %s ====' % now
+        description = '\n\n==== Updated on %s ====' % now
         description += '\nAuthor: %s' % svn_author
         description += '\nMessage: %s' % svn_log
         description += '\nRevision: %s' % svn_rev
@@ -276,7 +262,6 @@ class NetResults(object):
         description += '\nModified-Files:'
         for file in mod_files:
             description += '\n  %s' % file
-        description += '\n'
 
         self.cursor.execute("""
             UPDATE NRTracker.Records
@@ -310,11 +295,6 @@ if __name__ == '__main__':
         print 'Match: %s == %s' % (svnd['prn'], nrd['prn'])
     else:
         print 'No match: %s != %s' % (svnd['prn'], nrd['prn'])
-
-    if svnd['author'] == nrd['prn']:
-        print 'Match: %s == %s' % (svnd['author'], nrd['prn'])
-    else:
-        print 'No match: %s != %s' % (svnd['author'], nrd['prn'])
 
     if nrd['prn'] == 'Assigned':
         print 'PRN is assigned (pass)'
