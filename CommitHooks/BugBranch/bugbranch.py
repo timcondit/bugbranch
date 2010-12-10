@@ -7,7 +7,7 @@ import os.path
 import re
 import subprocess
 import sys
-from svn import core, fs, repos
+from svn import core, fs, repos #delta
 from time import strftime
 
 # NOTE: Use sys.stderr.write() to pass messages back to the calling process.
@@ -44,6 +44,7 @@ class Subversion(object):
         details['prn'] = str(self.__prn()) or None
         details['separator'] = str(self.__separator()) or None
         details['commit_text'] = str(self.__commit_text()) or None
+        details['revision'] = self.get_revision()
         details['author'] = str(self.__author()) or None
         if details['prn'] == '00000' and details['author'] == 'buildmgr':
             details['branch'] = None
@@ -168,6 +169,21 @@ class Subversion(object):
             write_debug("[changed] stderr:", stderr_text.strip('\n'))
         return stdout_text.strip()
 
+    def get_revision(self):
+        '''Returns the revision of this transaction'''
+        # This is a precommit hook, so the current revision is not available
+        # yet.  I'm cheating a little by adding 1 to the youngest revision,
+        # and hoping for the best. :)
+        p = subprocess.Popen([SVNLOOK, 'youngest', self.rpath],
+                stdin = subprocess.PIPE,
+                stdout = subprocess.PIPE,
+                stderr = subprocess.PIPE)
+        stdout_text, stderr_text = p.communicate(None)
+#        return stdout_text.strip()
+        # ugly
+        tmp = int(stdout_text.strip()) + 1
+        return str(tmp)
+
     def modified_files(self):
         '''A better (but new and unfamiliar) way to get the changed files'''
         return fs.paths_changed(self.txn_root).keys()
@@ -247,14 +263,14 @@ class NetResults(object):
                 write_debug("name:", str(name), "\n")
             sys.exit('Error: something broke in NetResults::name()')
 
-    def update_record(self, prn, svn_log, mod_files):
+    def update_record(self, prn, svn_log, rev, mod_files):
         '''Writes the validated commit message to the specified PRN'''
         # need the fields
         now = strftime("%a, %d %b %Y %H:%M:%S")
 #        message = "this is a test baba booey"
         description = '\n==== Updated on %s ====' % now
         description += '\nMessage: %s' % svn_log
-        description += '\nRevision: %s' % 'revision TBD'
+        description += '\nRevision: %s' % rev
         description += '\nBranch: %s' % 'branch TBD'
         description += '\nModified-Files:\n%s\n' % mod_files
         #self.cursor.execute("""
