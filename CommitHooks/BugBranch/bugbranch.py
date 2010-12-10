@@ -270,6 +270,19 @@ class NetResults(object):
             """, description, prn)
         self.conn.commit()
 
+        # The fun never stops! :)  Here's one way to update a record
+        # interactively with T-SQL.  Note the use of a test db.
+        #
+        # USE ProblemTracker_test
+        # DECLARE @MAX_ID int;
+        # DECLARE @MAX_ID_INCR int;
+        # SET @MAX_ID = (SELECT MAX(ID) FROM NRTracker.History)
+        # SET @MAX_ID_INCR = @MAX_ID + 1
+        # --SELECT @MAX_ID as "MaxID", @MAX_ID_INCR AS "MaxID++"
+        # INSERT INTO NRTracker.History (ID, PRN, HistoryComment)
+        # VALUES (@MAX_ID_INCR, 23001,'this is a test')
+        # SELECT * FROM NRTracker.History WHERE PRN = 23001
+
 
 if __name__ == '__main__':
     # get SVN data - it's not a commit hook yet, so it uses the last
