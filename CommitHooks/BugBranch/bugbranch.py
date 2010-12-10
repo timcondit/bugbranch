@@ -253,7 +253,7 @@ class NetResults(object):
         # need the fields
         now = strftime("%a, %d %b %Y %H:%M:%S")
 #        message = "this is a test baba booey"
-        description = '\n\n==== Updated on %s ====' % now
+        description = '\n==== Updated on %s ====' % now
         description += '\nAuthor: %s' % svn_author
         description += '\nMessage: %s' % svn_log
         description += '\nRevision: %s' % svn_rev
@@ -262,10 +262,11 @@ class NetResults(object):
         description += '\nModified-Files:'
         for file in mod_files:
             description += '\n  %s' % file
+        description += '\n'
 
         self.cursor.execute("""
             UPDATE NRTracker.Records
-            SET BigText1 = Convert(varchar(7000), BigText1) +
+            SET BigText3 = Convert(varchar(7000), BigText3) +
             Convert(varchar(7000), ?) WHERE PRN = ?
             """, description, prn)
         self.conn.commit()
