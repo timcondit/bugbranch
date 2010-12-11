@@ -11,7 +11,7 @@ import logging.handlers
 import os.path
 import sys
 
-BBROOT = r'F:/Repositories/newbugbranch/CommitHooks/BugBranch'
+BBROOT = r'F:/Repositories/ETCM/CommitHooks/BugBranch'
 INI_FILE = os.path.join(BBROOT, 'bugbranch.ini')
 LOG_FILE = os.path.join(BBROOT, 'bugbranch.log')
 

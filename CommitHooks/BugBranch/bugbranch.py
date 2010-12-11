@@ -13,7 +13,7 @@ from time import strftime
 # NOTE: Use sys.stderr.write() to pass messages back to the calling process.
 
 config = ConfigParser.SafeConfigParser()
-config.read(r'F:/Repositories/newbugbranch/CommitHooks/BugBranch/bugbranch.ini')
+config.read(r'F:/Repositories/ETCM/CommitHooks/BugBranch/bugbranch.ini')
 SVNLOOK = os.path.normpath(config.get('runtime','svnlook'))
 DEBUG = os.path.normpath(config.get('runtime','debug'))
 
