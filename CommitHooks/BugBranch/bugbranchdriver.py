@@ -62,6 +62,12 @@ def checkbug(repos, txn):
         svnd_p += ("\n  %s=%s" % (key, value))
     logger.debug(svnd_p)
 
+    # There's no PRN00000 and the query will fail, so check this one before
+    # fetching the PRN data.
+    if svnd['prn'] == '00000' and svnd['author'] == 'buildmgr':
+        logger.info("svnd['prn'] == '00000' and svnd['author'] == 'buildmgr'")
+        return
+
     nr = bugbranch.NetResults()
     # prn, title, assigned_to, status, project
     nrd = nr.get_details(svnd['prn'])
@@ -73,10 +79,6 @@ def checkbug(repos, txn):
     logger.debug(nrd_p)
 
     # do checks
-    #
-    if svnd['prn'] == '00000' and svnd['author'] == 'buildmgr':
-        logger.info("svnd['prn'] == '00000' and svnd['author'] == 'buildmgr'")
-        return
     if svnd['branch'][0] is None:
         msg = "0100: Commit failed: branch not found in active list"
         logger.error(msg)
