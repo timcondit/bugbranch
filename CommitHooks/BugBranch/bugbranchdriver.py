@@ -128,8 +128,10 @@ def checkbug(repos, txn):
     if (nrd['project'][1] == '10_2_0000'      and svnd['branch'][0] == 'Charlie')  or \
             (nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'Viper')    or \
             (nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'AvayaPDS') or \
+            (nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'JTAPI')    or \
             (nrd['project'][1] == '10_0_0200' and svnd['branch'][0] == '10_0_m')   or \
             (nrd['project'][1] == 'patch'     and svnd['branch'][0] == '10_0_m')   or \
+            (nrd['project'][1] == 'patch'     and svnd['branch'][0] == 'Viper')    or \
             (nrd['project'][1] == 'patch')           and \
                     (svnd['branch'][0] == '9_10_m'   or \
                     svnd['branch'][0] == '10_0_0115' or \
