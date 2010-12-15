@@ -123,7 +123,11 @@ class Subversion(object):
             sys.exit("[modbranch] something broke when fetching the last line")
 
         # 'A   path/to/file1.txt\r' --> 'A   path', 'to', 'file1.txt\r'
+        # Usually there are three spaces, but sometimes there are only two.
         parts = os.path.normpath(last_line).split("   ")
+        if len(parts) == 1:
+            parts = os.path.normpath(last_line).split("  ")
+
         # TODO these should be in bugbranch.ini
         branches = {
                 '9_10_m':       r'branches\9.10\maintenance\base',
