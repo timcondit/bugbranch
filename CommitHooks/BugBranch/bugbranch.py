@@ -128,16 +128,30 @@ class Subversion(object):
         if len(parts) == 1:
             parts = os.path.normpath(last_line).split("  ")
 
+        # SVN active branches (8 branches, 2010-12-30)
+        # 1     'AvayaPDS':     r'branches\projects\AvayaPDS',
+        # 2     'Charlie':      r'branches\projects\Charlie',
+        # 3     'JTAPI':        r'branches\projects\JTAPI',
+        # 4     'Viper':        r'branches\projects\Viper',
+        # 5     '9_10_m':       r'branches\9.10\maintenance\base',
+        # 6     '10_0_m':       r'branches\10.0\maintenance\base',
+        # 7     '10_0_0115':    r'branches\10.0\maintenance\10.0.0115',
+        # 8     '10_1_0001':    r'branches\10.1\maintenance\10.1.0001',
+        #
+        # This list does not include any of the 9.7 branches, even though some
+        # of them are still open.
+
         # TODO these should be in bugbranch.ini
         branches = {
+                # may need to add 9.7/maintenance/something eventually
+                'AvayaPDS':     r'branches\projects\AvayaPDS',
+                'Charlie':      r'branches\projects\Charlie',
+                'JTAPI':        r'branches\projects\JTAPI',
+                'Viper':        r'branches\projects\Viper',
                 '9_10_m':       r'branches\9.10\maintenance\base',
                 '10_0_m':       r'branches\10.0\maintenance\base',
                 '10_0_0115':    r'branches\10.0\maintenance\10.0.0115',
-                '10_0_0208':    r'branches\10.0\maintenance\10.0.0208',
-                '10_0_0214':    r'branches\10.0\maintenance\10.0.0214',
-                'Viper':        r'branches\projects\Viper',
-                'AvayaPDS':     r'branches\projects\AvayaPDS',
-                'JTAPI':        r'branches\projects\JTAPI',
+                '10_1_0001':    r'branches\10.1\maintenance\10.1.0001',
                 }
         for abbr, branch in branches.items():
             if branch in os.path.normpath(parts[1]):
@@ -211,12 +225,28 @@ class NetResults(object):
 
     def __project(self, project_str):
         '''Returns a unique string for each active project'''
+        # Fetch the full list from the ProblemTracker database with
+        # USE ProblemTracker
+        # SELECT DISTINCT Pulldown8 FROM NRTracker.Records
+        #
+        # NetResults current projects list (8 projects, 2010-12-30)
+        # 1     '8.4 maintenance'       '8_4_m'
+        # 2     '9.0 maintenance'       '9_0_m'
+        # 3     '9.7/9.10 maintenance'  '9_7__9_10_m'
+        # 4     '10.0 maintenance'      '10_0_m'
+        # 5     '10.1.0000 (Viper)'     '10_1_0000'
+        # 6     '10.1 GA'               '10_1_0001'
+        # 7     '10.2.0000 (Charlie)'   '10_2_0000'
+        # 8     'No Planned Project'    'no_project'
         projects = {
-                '10.2.0000 (Charlie)': '10_2_0000',
-                '10.1.0000 (Viper)': '10_1_0000',
-                '10.0.0200 (10.0.SP2)': '10_0_0200',
-                'Patch': 'patch',
-                'No Planned Project': 'no_project',
+                '8.4 maintenance':      '8_4_m',
+                '9.0 maintenance':      '9_0_m',
+                '9.7/9.10 maintenance': '9_7__9_10_m',
+                '10.0 maintenance':     '10_0_m',
+                '10.1.0000 (Viper)':    '10_1_0000',
+                '10.1 GA':              '10_1_0001',
+                '10.2.0000 (Charlie)':  '10_2_0000',
+                'No Planned Project':   'no_project',
                 }
         for key, value in projects.items():
             if project_str in key:
@@ -245,6 +275,7 @@ class NetResults(object):
         except ConfigParser.NoSectionError:
             sys.exit('Error: config file missing section %s (!)' % ini_section)
         except ConfigParser.NoOptionError:
+            # this is broken (regression) since I took out INI_FILE recently
             sys.exit('Error: user %s not found in %s' % (name, INI_FILE))
         except:
             if DEBUG == "True":

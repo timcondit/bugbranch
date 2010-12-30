@@ -101,42 +101,49 @@ def checkbug(repos, txn):
         logger.error(msg)
         sys.exit(msg)
 
+    # NetResults current projects list (8 projects, 2010-12-30)
+    # 1     '8.4 maintenance'       '8_4_m'
+    # 2     '9.0 maintenance'       '9_0_m'
+    # 3     '9.7/9.10 maintenance'  '9_7__9_10_m'
+    # 4     '10.0 maintenance'      '10_0_m'
+    # 5     '10.1.0000 (Viper)'     '10_1_0000'
+    # 6     '10.1 GA'               '10_1_0001'
+    # 7     '10.2.0000 (Charlie)'   '10_2_0000'
+    # 8     'No Planned Project'    'no_project'
+
+    # SVN active branches (8 branches, 2010-12-30)
+    # 1     'AvayaPDS':     r'branches\projects\AvayaPDS',
+    # 2     'Charlie':      r'branches\projects\Charlie',
+    # 3     'JTAPI':        r'branches\projects\JTAPI',
+    # 4     'Viper':        r'branches\projects\Viper',
+    # 5     '9_10_m':       r'branches\9.10\maintenance\base',
+    # 6     '10_0_m':       r'branches\10.0\maintenance\base',
+    # 7     '10_0_0115':    r'branches\10.0\maintenance\10.0.0115',
+    # 8     '10_1_0001':    r'branches\10.1\maintenance\10.1.0001',
     #
-    # Branches and abbreviations
-    #   '9_10_m':       r'branches\9.10\maintenance\base',
-    #   '10_0_m':       r'branches\10.0\maintenance\base',
-    #   '10_0_0115':    r'branches\10.0\maintenance\10.0.0115',
-    #   '10_0_0208':    r'branches\10.0\maintenance\10.0.0208',
-    #   '10_0_0214':    r'branches\10.0\maintenance\10.0.0214',
-    #   'Viper':        r'branches\projects\Viper',
-    #   'AvayaPDS':     r'branches\projects\AvayaPDS',
-    #   'JTAPI':        r'branches\projects\JTAPI',
-    #
-    # NetResults projects
-    #   '10.2.0000 (Charlie)'
-    #   '10.1.0000 (Viper)'
-    #   '10.0.0200 (10.0.SP2)'
-    #   'Patch'
-    #   'No Planned Project'
-    #   '8.4.9002 (8.4.SP9.HF2)'    [skip this one]
-    #
+    # This list does not include any of the 9.7 branches, even though some of
+    # them are still open.
+
+    if (nrd['project'][1] == 'no_project'):
+        pass
 
     # Note: I'm not going to bother with nrd['request_type'] for now.  Maybe
     # later.  It was in there before, but I don't see the benefit.
     #
     # This is where the decision table would be nice.
-    if (nrd['project'][1] == '10_2_0000'      and svnd['branch'][0] == 'Charlie')  or \
-            (nrd['project'][1] == '10_2_0000' and svnd['branch'][0] == 'AvayaPDS') or \
-            (nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'Viper')    or \
-            (nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'JTAPI')    or \
-            (nrd['project'][1] == '10_0_0200' and svnd['branch'][0] == '10_0_m')   or \
-            (nrd['project'][1] == 'patch'     and svnd['branch'][0] == '10_0_m')   or \
-            (nrd['project'][1] == 'patch'     and svnd['branch'][0] == 'Viper')    or \
-            (nrd['project'][1] == 'patch')           and \
-                    (svnd['branch'][0] == '9_10_m'   or \
-                    svnd['branch'][0] == '10_0_0115' or \
-                    svnd['branch'][0] == '10_0_0208' or \
-                    svnd['branch'][0] == '10_0_0214'):
+    if      (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'AvayaPDS')  or \
+            (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'Charlie')   or \
+            (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'JTAPI')     or \
+
+            (nrd['project'][1] == '10_1_0001'   and svnd['branch'][0] == '10_1_0001') or \
+            (nrd['project'][1] == '10_1_0000'   and svnd['branch'][0] == 'Viper')     or \
+
+            (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_m')    or \
+            (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_0115') or \
+
+            # TODO consider adding 9.7/maintenance/base and 9.7/SP1/EB/AFB-HPX
+            (nrd['project'][1] == '9_7__9_10_m' and svnd['branch'][0] == '9_10_m'):
+
         msg = "[driver] NRD %s, SVN %s" % (nrd['project'][1], svnd['branch'][0])
         write_debug(msg)
         logger.info(msg)
