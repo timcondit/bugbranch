@@ -100,6 +100,18 @@ def checkbug(repos, txn):
         msg = "0140: PRN is assigned to %s, not %s" % (nr.name(nrd['assigned_to']), svnd['author'])
         logger.error(msg)
         sys.exit(msg)
+    if nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'Viper':
+        msg = "0150: The Viper project is closed in ProblemTracker.  To\n"
+        msg += "check into the Viper branch, mark the bug as project 10.1 GA"
+        logger.error(msg)
+        sys.exit(msg)
+    if nrd['project'][1] == '10_0_m' and svnd['branch'][0] == '10_0_0115':
+        msg = "0160: There should be no more check-ins on this branch"
+        logger.error(msg)
+        sys.exit(msg)
+#    if nrd['project'][1] == 'patch':
+#        pass
+
 
     # NetResults current projects list (8 projects, 2010-12-30)
     # 1     '8.4 maintenance'       '8_4_m'
@@ -124,22 +136,18 @@ def checkbug(repos, txn):
     # This list does not include any of the 9.7 branches, even though some of
     # them are still open.
 
-    if (nrd['project'][1] == 'no_project'):
-        pass
-
-    # Note: I'm not going to bother with nrd['request_type'] for now.  Maybe
-    # later.  It was in there before, but I don't see the benefit.
+    # Notes:
     #
-    # This is where the decision table would be nice.
-    if      (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'AvayaPDS')  or \
-            (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'Charlie')   or \
-            (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'JTAPI')     or \
-            (nrd['project'][1] == '10_1_0001'   and svnd['branch'][0] == '10_1_0001') or \
-            (nrd['project'][1] == '10_1_0000'   and svnd['branch'][0] == 'Viper')     or \
-            (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_m')    or \
-            (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_0115') or \
+    # 1: I'm not going to bother with nrd['request_type'] for now.  Maybe
+    #    later.  It was in there before, but I don't see the benefit.
+    # 2: A decision table would be nice here.
+    # 3: Consider adding 9.7/maintenance/base and 9.7/SP1/EB/AFB-HPX
+    if      (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'AvayaPDS') or \
+            (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'Charlie')  or \
+            (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'JTAPI')    or \
+            (nrd['project'][1] == '10_1_0001'   and svnd['branch'][0] == 'Viper')    or \
+            (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_m')   or \
             (nrd['project'][1] == '9_7__9_10_m' and svnd['branch'][0] == '9_10_m'):
-            # TODO consider adding 9.7/maintenance/base and 9.7/SP1/EB/AFB-HPX
 
         msg = "[driver] NRD '%s', SVN '%s'" % (nrd['project'][0], svnd['branch'][0])
         write_debug(msg)
@@ -149,7 +157,9 @@ def checkbug(repos, txn):
                 svnd['revision'], svnd['branch'][1], svn.modified_files())
         return
     else:
-        msg = "error: NRD '%s', SVN '%s'" % (nrd['project'][0], svnd['branch'][0])
+        msg = "error: NRD '%s', SVN '%s', [PRN%s]" % \
+                (nrd['project'][0], svnd['branch'][0], svnd['prn'])
+        logger.error(msg)
         sys.exit(msg)
 
 if __name__ == '__main__':
