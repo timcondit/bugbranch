@@ -101,10 +101,15 @@ def checkbug(repos, txn):
         logger.error(msg)
         sys.exit(msg)
     if nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'Viper':
-        msg = "0150: The Viper project is closed in ProblemTracker.  To\n"
-        msg += "check into the Viper branch, mark the bug as project 10.1 GA"
-        logger.error(msg)
-        sys.exit(msg)
+        # TMP exception for PRN23870, part 1 of 2 - timc 1/3/2010
+        if svnd['author'] == 'michaelw':
+            pass
+        else:
+            msg = "0150: The Viper project is closed in ProblemTracker.  To\n"
+            msg += "check into the Viper branch, mark the bug as project 10.1 GA"
+            logger.error(msg)
+            sys.exit(msg)
+
     if nrd['project'][1] == '10_0_m' and svnd['branch'][0] == '10_0_0115':
         msg = "0160: There should be no more check-ins on this branch"
         logger.error(msg)
@@ -142,9 +147,12 @@ def checkbug(repos, txn):
     #    later.  It was in there before, but I don't see the benefit.
     # 2: A decision table would be nice here.
     # 3: Consider adding 9.7/maintenance/base and 9.7/SP1/EB/AFB-HPX
+
+    # TMP exception for PRN23870, part 2 of 2 below - timc 1/3/2010
     if      (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'AvayaPDS') or \
             (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'Charlie')  or \
             (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'JTAPI')    or \
+            (nrd['project'][1] == '10_1_0000'   and svnd['branch'][0] == 'Viper')    or \
             (nrd['project'][1] == '10_1_0001'   and svnd['branch'][0] == 'Viper')    or \
             (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_m')   or \
             (nrd['project'][1] == '9_7__9_10_m' and svnd['branch'][0] == '9_10_m'):
