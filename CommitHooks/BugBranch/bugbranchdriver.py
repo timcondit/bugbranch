@@ -102,7 +102,7 @@ def checkbug(repos, txn):
         sys.exit(msg)
     if nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'Viper':
         # TMP exception for PRN23870, part 1 of 2 - timc 1/3/2010
-        if svnd['author'] == 'michaelw':
+        if svnd['author'] == 'michaelw' or svnd['author'] == 'dennish':
             pass
         else:
             msg = "0150: The Viper project is closed in ProblemTracker.  To\n"
