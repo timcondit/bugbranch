@@ -103,7 +103,13 @@ def checkbug(repos, txn):
     if nrd['project'][1] == '10_1_0000' and svnd['branch'][0] == 'Viper':
         # TMP exception for PRN23870, part 1 of 2 - timc 1/3/2010
         if svnd['author'] == 'michaelw' or svnd['author'] == 'dennish':
-            pass
+            msg = "[driver] NRD '%s', SVN '%s'" % (nrd['project'][0], svnd['branch'][0])
+            write_debug(msg)
+            logger.info(msg)
+            write_debug(svnd['revision'])
+            nr.update_record(svnd['prn'], svnd['author'], svnd['commit_text'],
+                    svnd['revision'], svnd['branch'][1], svn.modified_files())
+            return
         else:
             msg = "0150: The Viper project is closed in ProblemTracker.  To\n"
             msg += "check into the Viper branch, mark the bug as project 10.1 GA"
