@@ -116,13 +116,6 @@ def checkbug(repos, txn):
             logger.error(msg)
             sys.exit(msg)
 
-    # TMP exception no. 2, to allow time to wrap up PRNs 23859 and 23870
-    # - timc 1/3/2010
-    if nrd['project'][1] == '10_1_0001' and svnd['branch'][0] == 'Viper':
-        msg = "0155: The 10.1 GA project is not yet open for new commits"
-        logger.error(msg)
-        sys.exit(msg)
-
     if nrd['project'][1] == '10_0_m' and svnd['branch'][0] == '10_0_0115':
         msg = "0160: There should be no more check-ins on this branch"
         logger.error(msg)
@@ -165,6 +158,7 @@ def checkbug(repos, txn):
     if      (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'AvayaPDS') or \
             (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'Charlie')  or \
             (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'JTAPI')    or \
+            (nrd['project'][1] == '10_1_0001'   and svnd['branch'][0] == 'Viper')    or \
             (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_m')   or \
             (nrd['project'][1] == '9_7__9_10_m' and svnd['branch'][0] == '9_10_m'):
 
