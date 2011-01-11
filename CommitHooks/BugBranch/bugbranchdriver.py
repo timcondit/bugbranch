@@ -137,10 +137,11 @@ def checkbug(repos, txn):
     # 3: Consider adding 9.7/maintenance/base and 9.7/SP1/EB/AFB-HPX
 
             #(nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'Charlie')  or \
-    if      (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'AvayaPDS') or \
-            (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'JTAPI')    or \
-            (nrd['project'][1] == '10_1_0001'   and svnd['branch'][0] == 'Viper')    or \
-            (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_m')   or \
+    if      (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'AvayaPDS')  or \
+            (nrd['project'][1] == '10_2_0000'   and svnd['branch'][0] == 'JTAPI')     or \
+            (nrd['project'][1] == '10_1_0001'   and svnd['branch'][0] == 'Viper')     or \
+            (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_m')    or \
+            (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_0216') or \
             (nrd['project'][1] == '9_7__9_10_m' and svnd['branch'][0] == '9_10_m'):
 
         msg = "[driver] NRD '%s', SVN '%s'" % (nrd['project'][0], svnd['branch'][0])

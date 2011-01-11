@@ -138,6 +138,7 @@ class Subversion(object):
                 '9_10_m':       r'branches\9.10\maintenance\base',
                 '10_0_m':       r'branches\10.0\maintenance\base',
                 '10_0_0115':    r'branches\10.0\maintenance\10.0.0115',
+                '10_0_0216':    r'branches\10.0\maintenance\10.0.0216',
                 }
                 #'Charlie':      r'branches\projects\Charlie',
 
