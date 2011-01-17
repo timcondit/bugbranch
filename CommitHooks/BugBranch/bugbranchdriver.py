@@ -79,8 +79,13 @@ def checkbug(repos, txn):
     logger.debug(nrd_p)
 
     # do checks
-    if svnd['branch'][0] is None:
-        msg = "0100: Commit failed: branch not found in active list"
+    try:
+        if svnd['branch'][0] is None:
+            msg = "0100: Commit failed: branch probably not in active list"
+            logger.error(msg)
+            sys.exit(msg)
+    except TypeError:
+        msg = "0100: Commit failed: branch probably not in active list"
         logger.error(msg)
         sys.exit(msg)
     # if we hit this, may need to update the list of projects
