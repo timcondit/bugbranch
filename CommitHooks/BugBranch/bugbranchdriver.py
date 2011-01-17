@@ -148,6 +148,7 @@ def checkbug(repos, txn):
             (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_m')    or \
             (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_0216') or \
             (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_0217') or \
+            (nrd['project'][1] == '10_0_m'      and svnd['branch'][0] == '10_0_0220') or \
             (nrd['project'][1] == '9_7__9_10_m' and svnd['branch'][0] == '9_10_m'):
 
         msg = "[driver] NRD '%s', SVN '%s'" % (nrd['project'][0], svnd['branch'][0])
