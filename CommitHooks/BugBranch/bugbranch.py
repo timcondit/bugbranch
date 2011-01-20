@@ -226,7 +226,7 @@ class NetResults(object):
                 '10.0 maintenance':     '10_0_m',
                 '10.1.0000 (Viper)':    '10_1_0000',
                 '10.1 GA':              '10_1_0001',
-                '10.2.0000 (Charlie)':  '10_2_0000',
+                'Charlie':              '10_2_0000',
                 'Backlog':              'backlog',
                 'No Planned Project':   'no_project',
                 }
